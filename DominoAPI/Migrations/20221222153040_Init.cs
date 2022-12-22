@@ -82,7 +82,6 @@ namespace DominoAPI.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Yield = table.Column<float>(type: "real", nullable: false),
                     ProductId = table.Column<int>(type: "int", nullable: false)
                 },
@@ -143,26 +142,26 @@ namespace DominoAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Ingredient",
+                name: "Ingredients",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ProductId = table.Column<int>(type: "int", nullable: false),
                     Content = table.Column<float>(type: "real", nullable: false),
+                    ProductId = table.Column<int>(type: "int", nullable: false),
                     SausageId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Ingredient", x => x.Id);
+                    table.PrimaryKey("PK_Ingredients", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Ingredient_Products_ProductId",
+                        name: "FK_Ingredients_Products_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Products",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Ingredient_Sausages_SausageId",
+                        name: "FK_Ingredients_Sausages_SausageId",
                         column: x => x.SausageId,
                         principalTable: "Sausages",
                         principalColumn: "Id");
@@ -174,13 +173,14 @@ namespace DominoAPI.Migrations
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Ingredient_ProductId",
-                table: "Ingredient",
-                column: "ProductId");
+                name: "IX_Ingredients_ProductId",
+                table: "Ingredients",
+                column: "ProductId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Ingredient_SausageId",
-                table: "Ingredient",
+                name: "IX_Ingredients_SausageId",
+                table: "Ingredients",
                 column: "SausageId");
 
             migrationBuilder.CreateIndex(
@@ -191,7 +191,8 @@ namespace DominoAPI.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Sausages_ProductId",
                 table: "Sausages",
-                column: "ProductId");
+                column: "ProductId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_RoleId",
@@ -206,7 +207,7 @@ namespace DominoAPI.Migrations
                 name: "Carcass");
 
             migrationBuilder.DropTable(
-                name: "Ingredient");
+                name: "Ingredients");
 
             migrationBuilder.DropTable(
                 name: "Sales");

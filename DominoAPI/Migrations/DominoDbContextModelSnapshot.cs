@@ -36,7 +36,7 @@ namespace DominoAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles");
+                    b.ToTable("Roles", (string)null);
                 });
 
             modelBuilder.Entity("DominoAPI.Entities.Accounts.User", b =>
@@ -68,7 +68,7 @@ namespace DominoAPI.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("DominoAPI.Entities.Butchery.Ingredient", b =>
@@ -90,11 +90,12 @@ namespace DominoAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("ProductId")
+                        .IsUnique();
 
                     b.HasIndex("SausageId");
 
-                    b.ToTable("Ingredient");
+                    b.ToTable("Ingredients", (string)null);
                 });
 
             modelBuilder.Entity("DominoAPI.Entities.Butchery.Sausage", b =>
@@ -105,10 +106,6 @@ namespace DominoAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
@@ -117,9 +114,10 @@ namespace DominoAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("ProductId")
+                        .IsUnique();
 
-                    b.ToTable("Sausages");
+                    b.ToTable("Sausages", (string)null);
                 });
 
             modelBuilder.Entity("DominoAPI.Entities.Product", b =>
@@ -142,7 +140,7 @@ namespace DominoAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("DominoAPI.Entities.Shops.Sale", b =>
@@ -169,7 +167,7 @@ namespace DominoAPI.Migrations
 
                     b.HasIndex("ShopId");
 
-                    b.ToTable("Sales");
+                    b.ToTable("Sales", (string)null);
                 });
 
             modelBuilder.Entity("DominoAPI.Entities.Shops.Shop", b =>
@@ -188,7 +186,7 @@ namespace DominoAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Shops");
+                    b.ToTable("Shops", (string)null);
                 });
 
             modelBuilder.Entity("DominoAPI.Entities.Variables.Carcass", b =>
@@ -220,7 +218,7 @@ namespace DominoAPI.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("Carcass");
+                    b.ToTable("Carcass", (string)null);
                 });
 
             modelBuilder.Entity("DominoAPI.Entities.Accounts.User", b =>
@@ -237,8 +235,8 @@ namespace DominoAPI.Migrations
             modelBuilder.Entity("DominoAPI.Entities.Butchery.Ingredient", b =>
                 {
                     b.HasOne("DominoAPI.Entities.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
+                        .WithOne("Ingredient")
+                        .HasForeignKey("DominoAPI.Entities.Butchery.Ingredient", "ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -252,8 +250,8 @@ namespace DominoAPI.Migrations
             modelBuilder.Entity("DominoAPI.Entities.Butchery.Sausage", b =>
                 {
                     b.HasOne("DominoAPI.Entities.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
+                        .WithOne("Sausage")
+                        .HasForeignKey("DominoAPI.Entities.Butchery.Sausage", "ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -285,6 +283,13 @@ namespace DominoAPI.Migrations
             modelBuilder.Entity("DominoAPI.Entities.Butchery.Sausage", b =>
                 {
                     b.Navigation("Ingredients");
+                });
+
+            modelBuilder.Entity("DominoAPI.Entities.Product", b =>
+                {
+                    b.Navigation("Ingredient");
+
+                    b.Navigation("Sausage");
                 });
 #pragma warning restore 612, 618
         }

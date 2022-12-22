@@ -15,6 +15,7 @@ namespace DominoAPI.Entities
         public DbSet<Product> Products { get; set; }
         public DbSet<Carcass> Carcass { get; set; }
         public DbSet<Sausage> Sausages { get; set; }
+        public DbSet<Ingredient> Ingredients { get; set; }
         public DbSet<Sale> Sales { get; set; }
         public DbSet<Shop> Shops { get; set; }
         public DbSet<Role> Roles { get; set; }

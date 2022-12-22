@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DominoAPI.Migrations
 {
     [DbContext(typeof(DominoDbContext))]
-    [Migration("20221221150254_Init")]
+    [Migration("20221222153040_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -93,11 +93,12 @@ namespace DominoAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("ProductId")
+                        .IsUnique();
 
                     b.HasIndex("SausageId");
 
-                    b.ToTable("Ingredient");
+                    b.ToTable("Ingredients");
                 });
 
             modelBuilder.Entity("DominoAPI.Entities.Butchery.Sausage", b =>
@@ -108,10 +109,6 @@ namespace DominoAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
@@ -120,7 +117,8 @@ namespace DominoAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("ProductId")
+                        .IsUnique();
 
                     b.ToTable("Sausages");
                 });
@@ -240,8 +238,8 @@ namespace DominoAPI.Migrations
             modelBuilder.Entity("DominoAPI.Entities.Butchery.Ingredient", b =>
                 {
                     b.HasOne("DominoAPI.Entities.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
+                        .WithOne("Ingredient")
+                        .HasForeignKey("DominoAPI.Entities.Butchery.Ingredient", "ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -255,8 +253,8 @@ namespace DominoAPI.Migrations
             modelBuilder.Entity("DominoAPI.Entities.Butchery.Sausage", b =>
                 {
                     b.HasOne("DominoAPI.Entities.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
+                        .WithOne("Sausage")
+                        .HasForeignKey("DominoAPI.Entities.Butchery.Sausage", "ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -288,6 +286,13 @@ namespace DominoAPI.Migrations
             modelBuilder.Entity("DominoAPI.Entities.Butchery.Sausage", b =>
                 {
                     b.Navigation("Ingredients");
+                });
+
+            modelBuilder.Entity("DominoAPI.Entities.Product", b =>
+                {
+                    b.Navigation("Ingredient");
+
+                    b.Navigation("Sausage");
                 });
 #pragma warning restore 612, 618
         }

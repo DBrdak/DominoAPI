@@ -1,4 +1,7 @@
-﻿namespace DominoAPI.Entities
+﻿using DominoAPI.Entities;
+using DominoAPI.Entities.Butchery;
+
+namespace DominoAPI.Entities
 {
     public enum ProductType
     {
@@ -13,5 +16,8 @@
         public ProductType ProductType { get; set; }
         public string Name { get; set; }
         public float Price { get; set; }
+
+        public virtual Sausage? Sausage { get; set; }
+        public virtual Ingredient? Ingredient { get; set; }
     }
 }

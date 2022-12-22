@@ -24,13 +24,13 @@ namespace DominoAPI
                         {
                             Name = "50/50",
                             Price = 7.9f,
-                            ProductType = ProductType.Sausage
+                            ProductType = ProductType.Meat
                         },
                         new Product()
                         {
                             Name = "80/20",
                             Price = 14.9f,
-                            ProductType = ProductType.Sausage
+                            ProductType = ProductType.Meat
                         }
                     };
 
@@ -38,7 +38,6 @@ namespace DominoAPI
 
                     var sausage = new Sausage()
                     {
-                        Name = "Kiełbasa krucha",
                         Ingredients = new List<Ingredient>()
                         {
                             new Ingredient()

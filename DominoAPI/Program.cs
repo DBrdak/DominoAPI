@@ -1,4 +1,5 @@
 using DominoAPI.Entities;
+using DominoAPI.Services;
 
 namespace DominoAPI
 {
@@ -11,11 +12,15 @@ namespace DominoAPI
             builder.Services.AddControllers();
 
             builder.Services.AddDbContext<DominoDbContext>();
+
             builder.Services.AddScoped<Seeder>();
 
-            var app = builder.Build();
+            builder.Services.AddScoped<IPriceListService, PriceListService>();
+            builder.Services.AddScoped<IButcheryService, ButcheryService>();
 
-            //app.UseHttpsRedirection();
+            builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+            var app = builder.Build();
 
             void SeedDatabase()
             {
@@ -30,8 +35,9 @@ namespace DominoAPI
                         throw;
                     }
             }
-
             SeedDatabase();
+
+            //app.UseHttpsRedirection();
 
             app.UseAuthorization();
 
