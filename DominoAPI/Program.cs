@@ -17,6 +17,7 @@ namespace DominoAPI
 
             builder.Services.AddScoped<IPriceListService, PriceListService>();
             builder.Services.AddScoped<IButcheryService, ButcheryService>();
+            builder.Services.AddScoped<IShopsService, ShopsService>();
 
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 

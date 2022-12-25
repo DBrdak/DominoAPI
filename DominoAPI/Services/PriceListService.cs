@@ -9,7 +9,7 @@ namespace DominoAPI.Services
 {
     public interface IPriceListService
     {
-        Task<List<DisplayProductDto>> GetAll(ProductType productType);
+        Task<List<DisplayProductDto>> GetAllProducts(ProductType productType);
 
         Task AddProduct(CreateProductDto dto);
 
@@ -29,7 +29,7 @@ namespace DominoAPI.Services
             _mapper = mapper;
         }
 
-        public async Task<List<DisplayProductDto>> GetAll(ProductType productType)
+        public async Task<List<DisplayProductDto>> GetAllProducts(ProductType productType)
         {
             var products = await _dbContext.Products
                 .Where(p => p.ProductType == productType)
@@ -53,7 +53,9 @@ namespace DominoAPI.Services
 
         public async Task UpdateProduct(UpdateProductDto dto, int id)
         {
-            var product = await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == id);
+            var product = await _dbContext.Products
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.Id == id);
 
             if (product is null)
             {
@@ -89,7 +91,7 @@ namespace DominoAPI.Services
                 throw new Exception();
             }
 
-            if (product.Ingredient != null || product.Sausage != null)
+            if (product.Ingredient.Count() == null || product.Sausage != null)
             {
                 throw new Exception("Can't remove object that exists in other table");
             }

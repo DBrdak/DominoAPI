@@ -18,9 +18,9 @@ namespace DominoAPI.Controllers
         }
 
         [HttpGet("{productType}")]
-        public async Task<IActionResult> GetAll([FromRoute] ProductType productType)
+        public async Task<IActionResult> GetAllProducts([FromRoute] ProductType productType)
         {
-            var products = await _priceListService.GetAll(productType);
+            var products = await _priceListService.GetAllProducts(productType);
 
             return Ok(products);
         }

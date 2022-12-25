@@ -1,5 +1,11 @@
-﻿using DominoAPI.Services;
+﻿using System.Text.Json;
+using DominoAPI.Models;
+using DominoAPI.Models.Create;
+using DominoAPI.Models.Update;
+using DominoAPI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Storage.Internal;
+using Newtonsoft.Json;
 
 namespace DominoAPI.Controllers
 {
@@ -36,6 +42,30 @@ namespace DominoAPI.Controllers
             var ingredients = await _butcheryService.GetIngredients(sausageId);
 
             return Ok(ingredients);
+        }
+
+        [HttpPost("sausages/add")]
+        public async Task<IActionResult> AddSausage([FromBody] CreateSausageDto dto)
+        {
+            await _butcheryService.AddSausage(dto);
+
+            return Ok();
+        }
+
+        [HttpDelete("sausages/delete/{sausageId}")]
+        public async Task<IActionResult> DeleteSausage([FromRoute] int sausageId)
+        {
+            await _butcheryService.DeleteSausage(sausageId);
+
+            return NoContent();
+        }
+
+        [HttpPut("sausages/update/{sausageId}")]
+        public async Task<IActionResult> UpdateSausage([FromRoute] int sausageId, [FromBody] UpdateSausageDto dto)
+        {
+            await _butcheryService.UpdateSausage(sausageId, dto);
+
+            return Ok();
         }
     }
 }

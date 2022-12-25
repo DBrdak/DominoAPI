@@ -23,10 +23,19 @@ namespace DominoAPI.Entities
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Ingredient>()
+                .HasOne(i => i.Product)
+                .WithMany(p => p.Ingredient);
+
+            modelBuilder.Entity<Sale>()
+                .HasOne(ss => ss.Shop)
+                .WithMany(s => s.Sales)
+                .HasForeignKey(ss => ss.ShopId);
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            optionsBuilder.EnableSensitiveDataLogging(true);
             optionsBuilder.UseSqlServer(_connectionString);
         }
     }

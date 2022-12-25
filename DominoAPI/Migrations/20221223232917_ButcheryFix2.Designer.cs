@@ -4,6 +4,7 @@ using DominoAPI.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DominoAPI.Migrations
 {
     [DbContext(typeof(DominoDbContext))]
-    partial class DominoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221223232917_ButcheryFix2")]
+    partial class ButcheryFix2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -90,7 +93,8 @@ namespace DominoAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("ProductId")
+                        .IsUnique();
 
                     b.HasIndex("SausageId");
 
@@ -234,8 +238,8 @@ namespace DominoAPI.Migrations
             modelBuilder.Entity("DominoAPI.Entities.Butchery.Ingredient", b =>
                 {
                     b.HasOne("DominoAPI.Entities.Product", "Product")
-                        .WithMany("Ingredient")
-                        .HasForeignKey("ProductId")
+                        .WithOne("Ingredient")
+                        .HasForeignKey("DominoAPI.Entities.Butchery.Ingredient", "ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -260,7 +264,7 @@ namespace DominoAPI.Migrations
             modelBuilder.Entity("DominoAPI.Entities.Shops.Sale", b =>
                 {
                     b.HasOne("DominoAPI.Entities.Shops.Shop", "Shop")
-                        .WithMany("Sales")
+                        .WithMany()
                         .HasForeignKey("ShopId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -289,11 +293,6 @@ namespace DominoAPI.Migrations
                     b.Navigation("Ingredient");
 
                     b.Navigation("Sausage");
-                });
-
-            modelBuilder.Entity("DominoAPI.Entities.Shops.Shop", b =>
-                {
-                    b.Navigation("Sales");
                 });
 #pragma warning restore 612, 618
         }

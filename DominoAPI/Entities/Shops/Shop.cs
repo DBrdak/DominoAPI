@@ -11,5 +11,6 @@
         public int Id { get; set; }
         public int ShopNumber { get; set; }
         public TypeofShop TypeOfShop { get; set; }
+        public IEnumerable<Sale> Sales { get; set; }
     }
 }

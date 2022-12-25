@@ -18,6 +18,6 @@ namespace DominoAPI.Entities
         public float Price { get; set; }
 
         public virtual Sausage? Sausage { get; set; }
-        public virtual Ingredient? Ingredient { get; set; }
+        public virtual IEnumerable<Ingredient>? Ingredient { get; set; }
     }
 }
