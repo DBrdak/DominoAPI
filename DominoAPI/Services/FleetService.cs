@@ -5,6 +5,8 @@ using DominoAPI.Entities.Fleet;
 using DominoAPI.Models.Create.Fleet;
 using DominoAPI.Models.Display.Fleet;
 using DominoAPI.Models.Update.Fleet;
+using FluentValidation.Validators;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace DominoAPI.Services
@@ -30,6 +32,18 @@ namespace DominoAPI.Services
         Task UpdateCar(UpdateCarDto dto, int carId);
 
         Task UpdateFuelSupply(UpdateFuelSupplyDto dto, int fuelSupplyId);
+
+        Task UpdateFuelNote(UpdateFuelNoteDto dto, int fuelNoteId, int fuelSupplyId);
+
+        Task DeleteCar(int carId);
+
+        Task DeleteFuelSupply(int fuelSupplyId);
+
+        Task DeleteFuelNote(int fuelNoteId, int fuelSupplyId);
+
+        Task DeleteFuelNoteRange(int fuelSupplyId, List<int> fuelNotesId);
+
+        Task DeleteAllFuelNotes(int fuelSupplyId);
     }
 
     public class FleetService : IFleetService
@@ -206,6 +220,139 @@ namespace DominoAPI.Services
             dto.MapTo(fuelSupply);
 
             _dbContext.FuelSupplies.Update(fuelSupply);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task UpdateFuelNote(UpdateFuelNoteDto dto, int fuelNoteId, int fuelSupplyId)
+        {
+            var fuelSupply = await _dbContext.FuelSupplies
+                .Include(fs => fs.FuelNotes)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(fs => fs.Id == fuelSupplyId);
+
+            var fuelNote = fuelSupply.FuelNotes
+                .FirstOrDefault(fn => fn.Id == fuelNoteId);
+
+            if (fuelNote is null || fuelSupply is null)
+            {
+                throw new Exception();
+            }
+
+            if (dto.Date > DateTime.UtcNow || dto.Date < fuelSupply.DateOfDelivery)
+            {
+                throw new Exception();
+            }
+
+            if (dto.CarId is not null)
+            {
+                var car = await _dbContext.Cars
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(c => c.Id == dto.CarId);
+
+                if (car is null)
+                {
+                    throw new Exception();
+                }
+            }
+
+            dto.MapTo(fuelNote);
+
+            _dbContext.Update(fuelNote);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task DeleteCar(int carId)
+        {
+            var car = await _dbContext.Cars
+                .Include(c => c.Shop)
+                .FirstOrDefaultAsync(c => c.Id == carId);
+
+            if (car is null)
+            {
+                throw new Exception();
+            }
+
+            _dbContext.Remove(car);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task DeleteFuelSupply(int fuelSupplyId)
+        {
+            var fuelSupply = await _dbContext.FuelSupplies
+                .FirstOrDefaultAsync(fs => fs.Id == fuelSupplyId);
+
+            if (fuelSupply is null)
+            {
+                throw new Exception();
+            }
+
+            _dbContext.Remove(fuelSupply);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task DeleteFuelNote(int fuelNoteId, int fuelSupplyId)
+        {
+            var fuelSupply = await _dbContext.FuelSupplies
+                .Include(fs => fs.FuelNotes)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(fs => fs.Id == fuelSupplyId);
+
+            var fuelNote = fuelSupply.FuelNotes
+                .FirstOrDefault(fn => fn.Id == fuelNoteId);
+
+            if (fuelNote is null || fuelSupply is null)
+            {
+                throw new Exception();
+            }
+
+            _dbContext.Remove(fuelNote);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task DeleteFuelNoteRange(int fuelSupplyId, List<int> fuelNotesId)
+        {
+            var fuelSupply = await _dbContext.FuelSupplies
+                .Include(fs => fs.FuelNotes)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(fs => fs.Id == fuelSupplyId);
+
+            if (fuelSupply is null)
+            {
+                throw new Exception();
+            }
+
+            var fuelNotes = new List<FuelNote>();
+
+            foreach (var fuelNoteId in fuelNotesId)
+            {
+                var fuelNote = fuelSupply.FuelNotes
+                    .FirstOrDefault(fn => fn.Id == fuelNoteId);
+
+                if (fuelNote is null)
+                {
+                    throw new Exception();
+                }
+
+                fuelNotes.Add(fuelNote);
+            }
+
+            _dbContext.RemoveRange(fuelNotes);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task DeleteAllFuelNotes(int fuelSupplyId)
+        {
+            var fuelSupply = await _dbContext.FuelSupplies
+                .Include(fs => fs.FuelNotes)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(fs => fs.Id == fuelSupplyId);
+
+            if (fuelSupply is null)
+            {
+                throw new Exception();
+            }
+
+            _dbContext.RemoveRange(fuelSupply.FuelNotes);
             await _dbContext.SaveChangesAsync();
         }
     }

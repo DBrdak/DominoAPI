@@ -56,7 +56,7 @@ namespace DominoAPI.Controllers
             return Created("New supply has been added", null);
         }
 
-        [HttpPost("fuel-note")]
+        [HttpPost("fuel-notes")]
         public async Task<IActionResult> AddRecentFuelNote([FromBody] CreateFuelNoteDto dto)
         {
             await _fleetService.AddRecentFuelNote(dto);
@@ -64,7 +64,7 @@ namespace DominoAPI.Controllers
             return Created("New note has been added", null);
         }
 
-        [HttpPost("fuel-supply/{fuelSupplyId}/fuel-note")]
+        [HttpPost("fuel-supply/{fuelSupplyId}/fuel-notes")]
         public async Task<IActionResult> AddManuallyFuelNote([FromBody] CreateFuelNoteDto dto, [FromRoute] int fuelSupplyId)
         {
             await _fleetService.AddManuallyFuelNote(dto, fuelSupplyId);
@@ -72,7 +72,7 @@ namespace DominoAPI.Controllers
             return Created("New note has been added", null);
         }
 
-        [HttpPut("cars/{carId}/note")]
+        [HttpPut("cars/{carId}/notes")]
         public async Task<IActionResult> UpdateCarNote([FromBody] string note, [FromRoute] int carId)
         {
             await _fleetService.UpdateCarNote(note, carId);
@@ -88,12 +88,61 @@ namespace DominoAPI.Controllers
             return Ok();
         }
 
-        [HttpPost("fuel-supply/{fuelSupplyId}")]
+        [HttpPut("fuel-supply/{fuelSupplyId}")]
         public async Task<IActionResult> UpdateFuelSupply([FromBody] UpdateFuelSupplyDto dto, [FromRoute] int fuelSupplyId)
         {
             await _fleetService.UpdateFuelSupply(dto, fuelSupplyId);
 
-            return Created("New supply has been added", null);
+            return Ok();
+        }
+
+        [HttpPut("fuel-supply/{fuelSupplyId}/{fuelNoteId}")]
+        public async Task<IActionResult> UpdateFuelNote([FromBody] UpdateFuelNoteDto dto,
+            [FromRoute] int fuelNoteId, [FromRoute] int fuelSupplyId)
+        {
+            await _fleetService.UpdateFuelNote(dto, fuelNoteId, fuelSupplyId);
+
+            return Ok();
+        }
+
+        [HttpDelete("cars/{carId}")]
+        public async Task<IActionResult> DeleteCar([FromRoute] int carId)
+        {
+            await _fleetService.DeleteCar(carId);
+
+            return NoContent();
+        }
+
+        [HttpDelete("fuel-supply/{fuelSupplyId}")]
+        public async Task<IActionResult> DeleteFuelSupply([FromRoute] int fuelSupplyId)
+        {
+            await _fleetService.DeleteFuelSupply(fuelSupplyId);
+
+            return NoContent();
+        }
+
+        [HttpDelete("fuel-supply/{fuelSupplyId}/{fuelNoteId}")]
+        public async Task<IActionResult> DeleteFuelNote([FromRoute] int fuelNoteId, [FromRoute] int fuelSupplyId)
+        {
+            await _fleetService.DeleteFuelNote(fuelNoteId, fuelSupplyId);
+
+            return NoContent();
+        }
+
+        [HttpDelete("fuel-supply/{fuelSupplyId}/fuel-notes")]
+        public async Task<IActionResult> DeleteFuelNoteRange([FromRoute] int fuelSupplyId, [FromBody] List<int> fuelNotesId)
+        {
+            await _fleetService.DeleteFuelNoteRange(fuelSupplyId, fuelNotesId);
+
+            return NoContent();
+        }
+
+        [HttpDelete("fuel-supply/{fuelSupplyId}/fuel-notes/all")]
+        public async Task<IActionResult> DeleteAllFuelNotes([FromRoute] int fuelSupplyId)
+        {
+            await _fleetService.DeleteAllFuelNotes(fuelSupplyId);
+
+            return NoContent();
         }
     }
 }

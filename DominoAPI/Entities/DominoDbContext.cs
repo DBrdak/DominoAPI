@@ -45,15 +45,15 @@ namespace DominoAPI.Entities
                 .WithOne(ss => ss.Shop)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<MobileShop>()
-                .HasOne(s => s.Car)
-                .WithOne(c => c.Shop)
-                .OnDelete(DeleteBehavior.Restrict);
+            //modelBuilder.Entity<MobileShop>()
+            //    .HasOne(s => s.Car)
+            //    .WithOne(c => c.Shop)
+            //    .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Car>()
                 .HasOne(c => c.Shop)
                 .WithOne(s => s.Car)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<FuelNote>()
                 .HasOne(fn => fn.FuelSupply)
