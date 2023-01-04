@@ -1,4 +1,6 @@
-﻿namespace DominoAPI.Entities.Shops
+﻿using DominoAPI.Entities.Fleet;
+
+namespace DominoAPI.Entities.Shops
 {
     public enum TypeofShop
     {
@@ -11,6 +13,12 @@
         public int Id { get; set; }
         public int ShopNumber { get; set; }
         public TypeofShop TypeOfShop { get; set; }
-        public IEnumerable<Sale> Sales { get; set; }
+
+        public string? Address { get; set; }
+
+        public int? CarId { get; set; }
+        public virtual Car? Car { get; set; }
+
+        public IEnumerable<Sale>? Sales { get; set; }
     }
 }

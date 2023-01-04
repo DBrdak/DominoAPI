@@ -1,13 +1,13 @@
-﻿using DominoAPI.Entities;
+﻿using DominoAPI.Entities.PriceList;
 using DominoAPI.Models;
-using DominoAPI.Models.Create;
+using DominoAPI.Models.Create.PriceList;
 using DominoAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DominoAPI.Controllers
 {
     [ApiController]
-    [Route("priceList")]
+    [Route("price-list")]
     public class PriceListController : ControllerBase
     {
         private IPriceListService _priceListService;
@@ -25,7 +25,7 @@ namespace DominoAPI.Controllers
             return Ok(products);
         }
 
-        [HttpPost("add")]
+        [HttpPost]
         public async Task<IActionResult> AddProduct([FromBody] CreateProductDto dto)
         {
             await _priceListService.AddProduct(dto);
@@ -33,7 +33,7 @@ namespace DominoAPI.Controllers
             return Created("New product has been added to price list", null);
         }
 
-        [HttpPatch("update/{id}")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateProduct([FromBody] UpdateProductDto dto, [FromRoute] int id)
         {
             await _priceListService.UpdateProduct(dto, id);
@@ -41,7 +41,7 @@ namespace DominoAPI.Controllers
             return Ok();
         }
 
-        [HttpDelete("delete/{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct([FromRoute] int id)
         {
             await _priceListService.DeleteProduct(id);

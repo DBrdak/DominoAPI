@@ -1,4 +1,6 @@
-﻿namespace DominoAPI.Entities.Butchery;
+﻿using DominoAPI.Entities.PriceList;
+
+namespace DominoAPI.Entities.Butchery;
 
 public class Sausage
 {

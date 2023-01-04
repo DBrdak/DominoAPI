@@ -1,6 +1,6 @@
-﻿using DominoAPI.Entities;
+﻿using DominoAPI.Entities.PriceList;
 
-namespace DominoAPI.Models.Create
+namespace DominoAPI.Models.Create.PriceList
 {
     public class CreateProductDto
     {

@@ -1,8 +1,9 @@
 ﻿using AutoMapper;
 using DominoAPI.Entities;
 using DominoAPI.Entities.Butchery;
-using DominoAPI.Models;
+using DominoAPI.Entities.PriceList;
 using DominoAPI.Models.Create;
+using DominoAPI.Models.Display.Butchery;
 using DominoAPI.Models.Update;
 using Microsoft.EntityFrameworkCore;
 
@@ -89,6 +90,7 @@ namespace DominoAPI.Services
         {
             var product = await _dbContext.Products
                 .Include(p => p.Sausage)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == dto.ProductId);
 
             if (product is null
@@ -101,26 +103,20 @@ namespace DominoAPI.Services
 
             foreach (var ingredient in dto.Ingredients)
             {
-                if (await _dbContext.Products.AsNoTracking().FirstOrDefaultAsync(p => p.Id == ingredient.ProductId) == null)
+                var tempProduct = await _dbContext.Products
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(p => p.Id == ingredient.ProductId);
+
+                if (tempProduct is null)
                 {
                     throw new Exception();
                 }
-
-                ingredient.Product = await _dbContext.Products
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(p => p.Id == ingredient.ProductId);
             }
 
             var newIngredients = _mapper.Map<List<Ingredient>>(dto.Ingredients);
 
-            var newSausage = new Sausage()
-            {
-                Product = product,
-                Yield = dto.yield,
-                Ingredients = newIngredients
-            };
+            var newSausage = _mapper.Map<Sausage>(dto);
 
-            await _dbContext.Ingredients.AddRangeAsync(newIngredients);
             await _dbContext.Sausages.AddAsync(newSausage);
             await _dbContext.SaveChangesAsync();
         }
@@ -136,7 +132,6 @@ namespace DominoAPI.Services
                 throw new Exception();
             }
 
-            _dbContext.Ingredients.RemoveRange(sausage.Ingredients);
             _dbContext.Sausages.Remove(sausage);
             await _dbContext.SaveChangesAsync();
         }

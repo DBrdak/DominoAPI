@@ -4,6 +4,7 @@ using DominoAPI.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DominoAPI.Migrations
 {
     [DbContext(typeof(DominoDbContext))]
-    partial class DominoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230102225411_GeneralFix02")]
+    partial class GeneralFix02
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -169,7 +172,7 @@ namespace DominoAPI.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("FuelSupplyId")
+                    b.Property<int?>("FuelSupplyId")
                         .HasColumnType("int");
 
                     b.Property<float>("Volume")
@@ -192,17 +195,14 @@ namespace DominoAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<float>("CurrentVolume")
-                        .HasColumnType("real");
-
                     b.Property<DateTime>("DateOfDelivery")
                         .HasColumnType("datetime2");
 
-                    b.Property<float>("DeliveryVolume")
-                        .HasColumnType("real");
-
                     b.Property<float>("Price")
                         .HasColumnType("real");
+
+                    b.Property<int>("Volume")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -367,15 +367,11 @@ namespace DominoAPI.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DominoAPI.Entities.Fleet.FuelSupply", "FuelSupply")
+                    b.HasOne("DominoAPI.Entities.Fleet.FuelSupply", null)
                         .WithMany("FuelNotes")
-                        .HasForeignKey("FuelSupplyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("FuelSupplyId");
 
                     b.Navigation("Car");
-
-                    b.Navigation("FuelSupply");
                 });
 
             modelBuilder.Entity("DominoAPI.Entities.Shops.Sale", b =>

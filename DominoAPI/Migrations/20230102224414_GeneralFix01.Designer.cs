@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DominoAPI.Migrations
 {
     [DbContext(typeof(DominoDbContext))]
-    [Migration("20221223232237_ButcheryFix")]
-    partial class ButcheryFix
+    [Migration("20230102224414_GeneralFix01")]
+    partial class GeneralFix01
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -88,13 +88,12 @@ namespace DominoAPI.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("SausageId")
+                    b.Property<int>("SausageId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId")
-                        .IsUnique();
+                    b.HasIndex("ProductId");
 
                     b.HasIndex("SausageId");
 
@@ -123,7 +122,94 @@ namespace DominoAPI.Migrations
                     b.ToTable("Sausages");
                 });
 
-            modelBuilder.Entity("DominoAPI.Entities.Product", b =>
+            modelBuilder.Entity("DominoAPI.Entities.Fleet.Car", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Make")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Mileage")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Model")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("RegistrationNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Cars");
+                });
+
+            modelBuilder.Entity("DominoAPI.Entities.Fleet.FuelNote", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CarId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("FuelSupplyId")
+                        .HasColumnType("int");
+
+                    b.Property<float>("Volume")
+                        .HasColumnType("real");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CarId");
+
+                    b.HasIndex("FuelSupplyId");
+
+                    b.ToTable("FuelNotes");
+                });
+
+            modelBuilder.Entity("DominoAPI.Entities.Fleet.FuelSupply", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DateOfDelivery")
+                        .HasColumnType("datetime2");
+
+                    b.Property<float>("Price")
+                        .HasColumnType("real");
+
+                    b.Property<int>("Volume")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FuelSupplies");
+                });
+
+            modelBuilder.Entity("DominoAPI.Entities.PriceList.Product", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -181,6 +267,12 @@ namespace DominoAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("CarId")
+                        .HasColumnType("int");
+
                     b.Property<int>("ShopNumber")
                         .HasColumnType("int");
 
@@ -188,6 +280,10 @@ namespace DominoAPI.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CarId")
+                        .IsUnique()
+                        .HasFilter("[CarId] IS NOT NULL");
 
                     b.ToTable("Shops");
                 });
@@ -237,22 +333,24 @@ namespace DominoAPI.Migrations
 
             modelBuilder.Entity("DominoAPI.Entities.Butchery.Ingredient", b =>
                 {
-                    b.HasOne("DominoAPI.Entities.Product", "Product")
-                        .WithOne("Ingredient")
-                        .HasForeignKey("DominoAPI.Entities.Butchery.Ingredient", "ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("DominoAPI.Entities.PriceList.Product", "Product")
+                        .WithMany("Ingredient")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("DominoAPI.Entities.Butchery.Sausage", null)
                         .WithMany("Ingredients")
-                        .HasForeignKey("SausageId");
+                        .HasForeignKey("SausageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Product");
                 });
 
             modelBuilder.Entity("DominoAPI.Entities.Butchery.Sausage", b =>
                 {
-                    b.HasOne("DominoAPI.Entities.Product", "Product")
+                    b.HasOne("DominoAPI.Entities.PriceList.Product", "Product")
                         .WithOne("Sausage")
                         .HasForeignKey("DominoAPI.Entities.Butchery.Sausage", "ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -261,10 +359,25 @@ namespace DominoAPI.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("DominoAPI.Entities.Fleet.FuelNote", b =>
+                {
+                    b.HasOne("DominoAPI.Entities.Fleet.Car", "Car")
+                        .WithMany("FuelNotes")
+                        .HasForeignKey("CarId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DominoAPI.Entities.Fleet.FuelSupply", null)
+                        .WithMany("FuelNotes")
+                        .HasForeignKey("FuelSupplyId");
+
+                    b.Navigation("Car");
+                });
+
             modelBuilder.Entity("DominoAPI.Entities.Shops.Sale", b =>
                 {
                     b.HasOne("DominoAPI.Entities.Shops.Shop", "Shop")
-                        .WithMany()
+                        .WithMany("Sales")
                         .HasForeignKey("ShopId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -272,9 +385,19 @@ namespace DominoAPI.Migrations
                     b.Navigation("Shop");
                 });
 
+            modelBuilder.Entity("DominoAPI.Entities.Shops.Shop", b =>
+                {
+                    b.HasOne("DominoAPI.Entities.Fleet.Car", "Car")
+                        .WithOne("Shop")
+                        .HasForeignKey("DominoAPI.Entities.Shops.Shop", "CarId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Car");
+                });
+
             modelBuilder.Entity("DominoAPI.Entities.Variables.Carcass", b =>
                 {
-                    b.HasOne("DominoAPI.Entities.Product", "Product")
+                    b.HasOne("DominoAPI.Entities.PriceList.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -288,11 +411,28 @@ namespace DominoAPI.Migrations
                     b.Navigation("Ingredients");
                 });
 
-            modelBuilder.Entity("DominoAPI.Entities.Product", b =>
+            modelBuilder.Entity("DominoAPI.Entities.Fleet.Car", b =>
+                {
+                    b.Navigation("FuelNotes");
+
+                    b.Navigation("Shop");
+                });
+
+            modelBuilder.Entity("DominoAPI.Entities.Fleet.FuelSupply", b =>
+                {
+                    b.Navigation("FuelNotes");
+                });
+
+            modelBuilder.Entity("DominoAPI.Entities.PriceList.Product", b =>
                 {
                     b.Navigation("Ingredient");
 
                     b.Navigation("Sausage");
+                });
+
+            modelBuilder.Entity("DominoAPI.Entities.Shops.Shop", b =>
+                {
+                    b.Navigation("Sales");
                 });
 #pragma warning restore 612, 618
         }

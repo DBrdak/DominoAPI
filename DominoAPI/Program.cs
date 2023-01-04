@@ -18,6 +18,7 @@ namespace DominoAPI
             builder.Services.AddScoped<IPriceListService, PriceListService>();
             builder.Services.AddScoped<IButcheryService, ButcheryService>();
             builder.Services.AddScoped<IShopsService, ShopsService>();
+            builder.Services.AddScoped<IFleetService, FleetService>();
 
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
@@ -25,16 +26,16 @@ namespace DominoAPI
 
             void SeedDatabase()
             {
-                using (var scope = app.Services.CreateScope())
-                    try
-                    {
-                        var scopedContext = scope.ServiceProvider.GetRequiredService<DominoDbContext>();
-                        Seeder.Seed(scopedContext);
-                    }
-                    catch
-                    {
-                        throw;
-                    }
+                using var scope = app.Services.CreateScope();
+                try
+                {
+                    var scopedContext = scope.ServiceProvider.GetRequiredService<DominoDbContext>();
+                    Seeder.Seed(scopedContext);
+                }
+                catch
+                {
+                    throw;
+                }
             }
             SeedDatabase();
 

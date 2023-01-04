@@ -1,4 +1,4 @@
-﻿using DominoAPI.Entities;
+﻿using DominoAPI.Entities.PriceList;
 
 namespace DominoAPI.Models
 {

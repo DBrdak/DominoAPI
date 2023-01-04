@@ -44,15 +44,15 @@ namespace DominoAPI.Controllers
             return Ok(ingredients);
         }
 
-        [HttpPost("sausages/add")]
+        [HttpPost("sausages")]
         public async Task<IActionResult> AddSausage([FromBody] CreateSausageDto dto)
         {
             await _butcheryService.AddSausage(dto);
 
-            return Ok();
+            return Created("New sausage has been added", null);
         }
 
-        [HttpDelete("sausages/delete/{sausageId}")]
+        [HttpDelete("sausages/{sausageId}")]
         public async Task<IActionResult> DeleteSausage([FromRoute] int sausageId)
         {
             await _butcheryService.DeleteSausage(sausageId);
@@ -60,7 +60,7 @@ namespace DominoAPI.Controllers
             return NoContent();
         }
 
-        [HttpPut("sausages/update/{sausageId}")]
+        [HttpPut("sausages/{sausageId}")]
         public async Task<IActionResult> UpdateSausage([FromRoute] int sausageId, [FromBody] UpdateSausageDto dto)
         {
             await _butcheryService.UpdateSausage(sausageId, dto);

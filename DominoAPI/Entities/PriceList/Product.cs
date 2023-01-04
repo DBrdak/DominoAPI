@@ -1,7 +1,6 @@
-﻿using DominoAPI.Entities;
-using DominoAPI.Entities.Butchery;
+﻿using DominoAPI.Entities.Butchery;
 
-namespace DominoAPI.Entities
+namespace DominoAPI.Entities.PriceList
 {
     public enum ProductType
     {

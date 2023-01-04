@@ -1,4 +1,6 @@
-﻿namespace DominoAPI.Entities.Variables
+﻿using DominoAPI.Entities.PriceList;
+
+namespace DominoAPI.Entities.Variables
 {
     public enum Part
     {

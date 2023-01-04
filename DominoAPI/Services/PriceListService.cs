@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using DominoAPI.Entities;
 using DominoAPI.Entities.Butchery;
+using DominoAPI.Entities.PriceList;
 using DominoAPI.Models;
-using DominoAPI.Models.Create;
+using DominoAPI.Models.Create.PriceList;
+using DominoAPI.Models.Display.Fleet;
 using Microsoft.EntityFrameworkCore;
 
 namespace DominoAPI.Services
@@ -36,24 +38,24 @@ namespace DominoAPI.Services
                 .AsNoTracking()
                 .ToListAsync();
 
-            var productDtos = _mapper.Map<List<DisplayProductDto>>(products);
+            var dto = _mapper.Map<List<DisplayProductDto>>(products);
 
-            productDtos.Select(p => p.ProductType);
-
-            return productDtos;
+            return dto;
         }
 
         public async Task AddProduct(CreateProductDto dto)
         {
             var product = _mapper.Map<Product>(dto);
 
-            _dbContext.Products.Add(product);
+            await _dbContext.Products.AddAsync(product);
             await _dbContext.SaveChangesAsync();
         }
 
         public async Task UpdateProduct(UpdateProductDto dto, int id)
         {
             var product = await _dbContext.Products
+                .Include(p => p.Ingredient)
+                .Include(p => p.Sausage)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == id);
 
@@ -70,7 +72,7 @@ namespace DominoAPI.Services
             {
                 product.Price = (float)dto.Price;
             }
-            if (dto.ProductType != null && product.Sausage == null)
+            if (dto.ProductType != null && product.Sausage == null && !product.Ingredient.Any())
             {
                 product.ProductType = (ProductType)dto.ProductType;
             }
@@ -84,6 +86,7 @@ namespace DominoAPI.Services
             var product = await _dbContext.Products
                 .Include(p => p.Ingredient)
                 .Include(p => p.Sausage)
+                .ThenInclude(s => s.Ingredients)
                 .FirstOrDefaultAsync(p => p.Id == Id);
 
             if (product is null)
@@ -91,9 +94,9 @@ namespace DominoAPI.Services
                 throw new Exception();
             }
 
-            if (product.Ingredient.Count() == null || product.Sausage != null)
+            if (!product.Ingredient.Any())
             {
-                throw new Exception("Can't remove object that exists in other table");
+                throw new Exception();
             }
 
             _dbContext.Products.Remove(product);

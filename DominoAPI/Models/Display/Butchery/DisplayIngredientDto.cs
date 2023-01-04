@@ -1,6 +1,6 @@
 ﻿using DominoAPI.Entities;
 
-namespace DominoAPI.Models
+namespace DominoAPI.Models.Display.Butchery
 {
     public class DisplayIngredientDto
     {

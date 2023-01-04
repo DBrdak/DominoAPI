@@ -4,14 +4,14 @@ using DominoAPI.Entities.Shops;
 using DominoAPI.Entities.Variables;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
+using DominoAPI.Entities.Fleet;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using DominoAPI.Entities.PriceList;
 
 namespace DominoAPI.Entities
 {
     public class DominoDbContext : DbContext
     {
-        private readonly string _connectionString =
-            "Server=HAPINGSZEN;Database=DominoDb;Trusted_Connection=True;trustServerCertificate = true;";
-
         public DbSet<Product> Products { get; set; }
         public DbSet<Carcass> Carcass { get; set; }
         public DbSet<Sausage> Sausages { get; set; }
@@ -20,23 +20,52 @@ namespace DominoAPI.Entities
         public DbSet<Shop> Shops { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<Car> Cars { get; set; }
+        public DbSet<FuelNote> FuelNotes { get; set; }
+        public DbSet<FuelSupply> FuelSupplies { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Sausage>()
+                .HasMany(s => s.Ingredients)
+                .WithOne()
+                .HasForeignKey(i => i.SausageId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<Ingredient>()
                 .HasOne(i => i.Product)
-                .WithMany(p => p.Ingredient);
+                .WithMany(p => p.Ingredient)
+                .HasForeignKey(i => i.ProductId)
+                .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<Sale>()
-                .HasOne(ss => ss.Shop)
-                .WithMany(s => s.Sales)
-                .HasForeignKey(ss => ss.ShopId);
+            modelBuilder.Entity<Shop>()
+                .HasMany(s => s.Sales)
+                .WithOne(ss => ss.Shop)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Shop>()
+                .HasOne(s => s.Car)
+                .WithOne(c => c.Shop)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Car>()
+                .HasOne(c => c.Shop)
+                .WithOne(s => s.Car)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<FuelNote>()
+                .HasOne(fn => fn.FuelSupply)
+                .WithMany(fs => fs.FuelNotes);
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.EnableSensitiveDataLogging(true);
-            optionsBuilder.UseSqlServer(_connectionString);
+            IConfigurationRoot configuration = new ConfigurationBuilder()
+                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+            optionsBuilder.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
         }
     }
 }
