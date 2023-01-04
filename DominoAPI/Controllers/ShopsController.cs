@@ -1,5 +1,5 @@
 ﻿using DominoAPI.Models.Create.Shops;
-using DominoAPI.Models.Update;
+using DominoAPI.Models.Update.Shops;
 using DominoAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -42,7 +42,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddShop([FromBody] CreateShopDto dto)
+        public async Task<IActionResult> AddMobileShop([FromBody] CreateShopDto dto)
         {
             await _shopsService.AddShop(dto);
 
@@ -53,6 +53,14 @@ namespace DominoAPI.Controllers
         public async Task<IActionResult> AddNewSale([FromRoute] int shopId, [FromBody] CreateSaleDto dto)
         {
             await _shopsService.AddNewSale(dto, shopId);
+
+            return Created("New sale has been added", null);
+        }
+
+        [HttpPost("sales/{shopId}")]
+        public async Task<IActionResult> AddNewRecentSale([FromRoute] int shopId, [FromBody] CreateSaleDto dto)
+        {
+            await _shopsService.AddNewRecentSale(dto, shopId);
 
             return Created("New sale has been added", null);
         }

@@ -1,4 +1,5 @@
 ﻿using DominoAPI.Models.Create.Fleet;
+using DominoAPI.Models.Update.Fleet;
 using DominoAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -69,6 +70,30 @@ namespace DominoAPI.Controllers
             await _fleetService.AddManuallyFuelNote(dto, fuelSupplyId);
 
             return Created("New note has been added", null);
+        }
+
+        [HttpPut("cars/{carId}/note")]
+        public async Task<IActionResult> UpdateCarNote([FromBody] string note, [FromRoute] int carId)
+        {
+            await _fleetService.UpdateCarNote(note, carId);
+
+            return Created("New note has been added", null);
+        }
+
+        [HttpPut("cars/{carId}")]
+        public async Task<IActionResult> UpdateCar([FromBody] UpdateCarDto dto, [FromRoute] int carId)
+        {
+            await _fleetService.UpdateCar(dto, carId);
+
+            return Ok();
+        }
+
+        [HttpPost("fuel-supply/{fuelSupplyId}")]
+        public async Task<IActionResult> UpdateFuelSupply([FromBody] UpdateFuelSupplyDto dto, [FromRoute] int fuelSupplyId)
+        {
+            await _fleetService.UpdateFuelSupply(dto, fuelSupplyId);
+
+            return Created("New supply has been added", null);
         }
     }
 }

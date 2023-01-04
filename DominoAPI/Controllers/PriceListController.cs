@@ -1,6 +1,6 @@
 ﻿using DominoAPI.Entities.PriceList;
-using DominoAPI.Models;
 using DominoAPI.Models.Create.PriceList;
+using DominoAPI.Models.Update.PriceList;
 using DominoAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 

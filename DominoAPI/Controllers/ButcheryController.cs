@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using DominoAPI.Models;
 using DominoAPI.Models.Create;
-using DominoAPI.Models.Update;
+using DominoAPI.Models.Update.Butchery;
 using DominoAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Storage.Internal;

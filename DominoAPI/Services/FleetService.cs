@@ -1,8 +1,10 @@
-﻿using AutoMapper;
+﻿using System.Reflection;
+using AutoMapper;
 using DominoAPI.Entities;
 using DominoAPI.Entities.Fleet;
 using DominoAPI.Models.Create.Fleet;
 using DominoAPI.Models.Display.Fleet;
+using DominoAPI.Models.Update.Fleet;
 using Microsoft.EntityFrameworkCore;
 
 namespace DominoAPI.Services
@@ -22,6 +24,12 @@ namespace DominoAPI.Services
         Task AddRecentFuelNote(CreateFuelNoteDto dto);
 
         Task AddManuallyFuelNote(CreateFuelNoteDto dto, int fuelSupplyId);
+
+        Task UpdateCarNote(string note, int carId);
+
+        Task UpdateCar(UpdateCarDto dto, int carId);
+
+        Task UpdateFuelSupply(UpdateFuelSupplyDto dto, int fuelSupplyId);
     }
 
     public class FleetService : IFleetService
@@ -91,7 +99,7 @@ namespace DominoAPI.Services
                 .AsNoTracking()
                 .LastOrDefaultAsync();
 
-            if (!(lastfuelSupply is null) && (dto.DateOfDelivery > DateTime.UtcNow || dto.DateOfDelivery < lastfuelSupply.DateOfDelivery))
+            if (lastfuelSupply is not null && (dto.DateOfDelivery > DateTime.UtcNow || dto.DateOfDelivery < lastfuelSupply.DateOfDelivery))
             {
                 throw new Exception();
             }
@@ -122,6 +130,7 @@ namespace DominoAPI.Services
 
             lastFuelSupply.CurrentVolume -= newFuelNote.Volume;
 
+            _dbContext.Update(lastFuelSupply);
             await _dbContext.AddAsync(newFuelNote);
             await _dbContext.SaveChangesAsync();
         }
@@ -144,6 +153,59 @@ namespace DominoAPI.Services
             fuelSupply.CurrentVolume -= newFuelNote.Volume;
 
             await _dbContext.AddAsync(newFuelNote);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task UpdateCarNote(string note, int carId)
+        {
+            var car = await _dbContext.Cars
+                .FirstOrDefaultAsync(c => c.Id == carId);
+
+            if (car is null)
+            {
+                throw new Exception();
+            }
+
+            car.Note = note;
+
+            _dbContext.Cars.Update(car);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task UpdateCar(UpdateCarDto dto, int carId)
+        {
+            var car = await _dbContext.Cars
+                .FirstOrDefaultAsync(c => c.Id == carId);
+
+            if (car is null)
+            {
+                throw new Exception();
+            }
+
+            dto.MapTo(car);
+
+            _dbContext.Cars.Update(car);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task UpdateFuelSupply(UpdateFuelSupplyDto dto, int fuelSupplyId)
+        {
+            var fuelSupply = await _dbContext.FuelSupplies
+                .FirstOrDefaultAsync(fs => fs.Id == fuelSupplyId);
+
+            if (fuelSupply is null)
+            {
+                throw new Exception();
+            }
+
+            if (dto.DateOfDelivery > DateTime.UtcNow)
+            {
+                throw new Exception();
+            }
+
+            dto.MapTo(fuelSupply);
+
+            _dbContext.FuelSupplies.Update(fuelSupply);
             await _dbContext.SaveChangesAsync();
         }
     }

@@ -14,54 +14,54 @@ namespace DominoAPI
         {
             if (_dbContext.Database.CanConnect())
             {
-                if (!_dbContext.Sausages.Any() && !_dbContext.Products.Any())
-                {
-                    var products = new List<Product>()
-                    {
-                        new Product()
-                        {
-                            Name = "Kiełbasa krucha",
-                            Price = 22.9f,
-                            ProductType = ProductType.Sausage
-                        },
-                        new Product()
-                        {
-                            Name = "50/50",
-                            Price = 7.9f,
-                            ProductType = ProductType.Meat
-                        },
-                        new Product()
-                        {
-                            Name = "80/20",
-                            Price = 14.9f,
-                            ProductType = ProductType.Meat
-                        }
-                    };
+                //if (!_dbContext.Sausages.Any() && !_dbContext.Products.Any())
+                //{
+                //    var products = new List<Product>()
+                //    {
+                //        new Product()
+                //        {
+                //            Name = "Kiełbasa krucha",
+                //            Price = 22.9f,
+                //            ProductType = ProductType.Sausage
+                //        },
+                //        new Product()
+                //        {
+                //            Name = "50/50",
+                //            Price = 7.9f,
+                //            ProductType = ProductType.Meat
+                //        },
+                //        new Product()
+                //        {
+                //            Name = "80/20",
+                //            Price = 14.9f,
+                //            ProductType = ProductType.Meat
+                //        }
+                //    };
 
-                    _dbContext.Products.AddRange(products);
+                //    _dbContext.Products.AddRange(products);
 
-                    var sausage = new Sausage()
-                    {
-                        Ingredients = new List<Ingredient>()
-                        {
-                            new Ingredient()
-                            {
-                                Product = products[1],
-                                Content = .3f
-                            },
-                            new Ingredient()
-                            {
-                                Product = products[2],
-                                Content = .7f
-                            }
-                        },
-                        Yield = 0.95f,
-                        Product = products[0]
-                    };
-                    _dbContext.Sausages.Add(sausage);
-                }
+                //    var sausage = new Sausage()
+                //    {
+                //        Ingredients = new List<Ingredient>()
+                //        {
+                //            new Ingredient()
+                //            {
+                //                Product = products[1],
+                //                Content = .3f
+                //            },
+                //            new Ingredient()
+                //            {
+                //                Product = products[2],
+                //                Content = .7f
+                //            }
+                //        },
+                //        Yield = 0.95f,
+                //        Product = products[0]
+                //    };
+                //    _dbContext.Sausages.Add(sausage);
+                //}
 
-                if (!_dbContext.FuelNotes.Any() && !_dbContext.FuelSupplies.Any() && !_dbContext.Cars.Any() 
+                if (!_dbContext.FuelNotes.Any() && !_dbContext.FuelSupplies.Any() && !_dbContext.Cars.Any()
                     && !_dbContext.Shops.Any() && !_dbContext.Sales.Any())
                 {
                     var cars = new List<Car>()
@@ -128,40 +128,34 @@ namespace DominoAPI
 
                     var shops = new List<Shop>()
                     {
-                        new Shop()
+                        new StationaryShop()
                         {
                             ShopNumber = 1,
-                            TypeOfShop = TypeofShop.Stationary,
                             Address = "Raciąż ul. Piłsudskiego 2/1"
                         },
-                        new Shop()
+                        new MobileShop()
                         {
                             ShopNumber = 2,
-                            TypeOfShop = TypeofShop.Mobile,
                             Car = cars[1]
                         },
-                        new Shop()
+                        new MobileShop()
                         {
                             ShopNumber = 4,
-                            TypeOfShop = TypeofShop.Mobile,
                             Car = cars[3]
                         },
-                        new Shop()
+                        new MobileShop()
                         {
                             ShopNumber = 5,
-                            TypeOfShop = TypeofShop.Mobile,
                             Car = cars[4]
                         },
-                        new Shop()
+                        new MobileShop()
                         {
                             ShopNumber = 6,
-                            TypeOfShop = TypeofShop.Stationary,
                             Car = cars[2]
                         },
-                        new Shop()
+                        new StationaryShop()
                         {
                             ShopNumber = 8,
-                            TypeOfShop = TypeofShop.Mobile,
                             Address = "Pólka-Raciąż 75A"
                         },
                     };

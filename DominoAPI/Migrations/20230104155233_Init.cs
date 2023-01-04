@@ -20,9 +20,9 @@ namespace DominoAPI.Migrations
                     RegistrationNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Make = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Model = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Note = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Mileage = table.Column<long>(type: "bigint", nullable: true)
+                    Description = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: true),
+                    Note = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: true),
+                    Mileage = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -36,7 +36,9 @@ namespace DominoAPI.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     DateOfDelivery = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Volume = table.Column<long>(type: "bigint", nullable: false)
+                    DeliveryVolume = table.Column<float>(type: "real", nullable: false),
+                    CurrentVolume = table.Column<float>(type: "real", nullable: false),
+                    Price = table.Column<float>(type: "real", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -78,9 +80,9 @@ namespace DominoAPI.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ShopNumber = table.Column<int>(type: "int", nullable: false),
-                    TypeOfShop = table.Column<int>(type: "int", nullable: false),
-                    Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CarId = table.Column<int>(type: "int", nullable: true)
+                    Discriminator = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CarId = table.Column<int>(type: "int", nullable: true),
+                    Address = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -100,9 +102,9 @@ namespace DominoAPI.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Date = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Volume = table.Column<long>(type: "bigint", nullable: false),
+                    Volume = table.Column<float>(type: "real", nullable: false),
                     CarId = table.Column<int>(type: "int", nullable: false),
-                    FuelSupplyId = table.Column<int>(type: "int", nullable: true)
+                    FuelSupplyId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -117,7 +119,8 @@ namespace DominoAPI.Migrations
                         name: "FK_FuelNotes_FuelSupplies_FuelSupplyId",
                         column: x => x.FuelSupplyId,
                         principalTable: "FuelSupplies",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -225,13 +228,13 @@ namespace DominoAPI.Migrations
                         name: "FK_Ingredients_Products_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Products",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Ingredients_Sausages_SausageId",
                         column: x => x.SausageId,
                         principalTable: "Sausages",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(

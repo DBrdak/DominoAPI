@@ -6,6 +6,7 @@ using DominoAPI.Entities.Shops;
 using DominoAPI.Models.Create;
 using DominoAPI.Models.Create.Fleet;
 using DominoAPI.Models.Create.PriceList;
+using DominoAPI.Models.Create.Shops;
 using DominoAPI.Models.Display.Butchery;
 using DominoAPI.Models.Display.Fleet;
 using DominoAPI.Models.Display.Shops;
@@ -17,51 +18,70 @@ namespace DominoAPI
     {
         public MappingProfile()
         {
-            CreateMap<Product, DisplayProductDto>()
-                .ForMember(p => p.ProductType, a => a.MapFrom(b => b.ProductType.ToString()));
+            // PriceList maps
+            {
+                CreateMap<Product, DisplayProductDto>()
+                    .ForMember(p => p.ProductType, a => a.MapFrom(b => b.ProductType.ToString()));
 
-            CreateMap<CreateProductDto, Product>();
+                CreateMap<CreateProductDto, Product>();
+            }
 
-            CreateMap<Ingredient, DisplayIngredientDto>()
-                .ForMember(i => i.ProductName, a => a.MapFrom(b => b.Product.Name))
-                .ForMember(i => i.ProductType, a => a.MapFrom(b => b.Product.ProductType.ToString()));
+            // Butchery maps
+            {
+                CreateMap<Ingredient, DisplayIngredientDto>()
+                    .ForMember(i => i.ProductName, a => a.MapFrom(b => b.Product.Name))
+                    .ForMember(i => i.ProductType, a => a.MapFrom(b => b.Product.ProductType.ToString()));
 
-            CreateMap<CreateIngredientDto, Ingredient>();
+                CreateMap<CreateIngredientDto, Ingredient>();
 
-            CreateMap<CreateSausageDto, Sausage>();
+                CreateMap<CreateSausageDto, Sausage>();
 
-            CreateMap<Sausage, DisplaySausageDto>()
-                .ForMember(s => s.Name, a => a.MapFrom(b => b.Product.Name))
-                .ForMember(s => s.Price, a => a.MapFrom(b => b.Product.Price))
-                .ForMember(s => s.Ingredients, a => a.MapFrom(b => b.Ingredients));
+                CreateMap<Sausage, DisplaySausageDto>()
+                    .ForMember(s => s.Name, a => a.MapFrom(b => b.Product.Name))
+                    .ForMember(s => s.Price, a => a.MapFrom(b => b.Product.Price))
+                    .ForMember(s => s.Ingredients, a => a.MapFrom(b => b.Ingredients));
+            }
 
-            CreateMap<Shop, DisplayShopDto>()
-                .ForMember(s => s.TypeOfShop, a => a.MapFrom(b => b.TypeOfShop.ToString()));
+            // Shop maps
+            {
+                CreateMap<MobileShop, DisplayShopDto>();
+                CreateMap<StationaryShop, DisplayShopDto>();
 
-            CreateMap<Shop, DisplayShopDetailsDto>()
-                .ForMember(s => s.Sales, a => a.Ignore())
-                .ForMember(s => s.TypeOfShop, a => a.MapFrom(b => b.TypeOfShop.ToString()));
+                CreateMap<Sale, DisplaySaleDto>()
+                    .ForMember(ss => ss.Date, a => a.MapFrom(b => b.Date.ToShortDateString()));
 
-            CreateMap<Sale, DisplaySaleDto>()
-                .ForMember(ss => ss.Date, a => a.MapFrom(b => b.Date.ToShortDateString()));
+                CreateMap<MobileShop, DisplayMobileShopDto>()
+                    .ForMember(s => s.Sales, a => a.MapFrom(b => b.Sales));
 
-            CreateMap<Car, DisplayCarDto>()
-                .ForMember(c => c.ShopNumber, a => a.MapFrom(b => b.Shop.ShopNumber));
+                CreateMap<StationaryShop, DisplayStationaryShopDto>()
+                    .ForMember(s => s.Sales, a => a.MapFrom(b => b.Sales));
 
-            CreateMap<FuelNote, DisplayFuelNoteDto>()
-                .ForMember(fn => fn.Date, a => a.MapFrom(b => b.Date.ToShortDateString()))
-                .ForMember(fn => fn.RegistrationNumber, a => a.MapFrom(b => b.Car.RegistrationNumber));
+                CreateMap<CreateShopDto, MobileShop>();
+                CreateMap<CreateShopDto, StationaryShop>();
 
-            CreateMap<FuelSupply, DisplayFuelSupplyDto>()
-                .ForMember(fs => fs.DateOfDelivery, a => a.MapFrom(b => b.DateOfDelivery.ToShortDateString()))
-                .ForMember(fs => fs.FuelNotes, a => a.MapFrom(b => b.FuelNotes));
+                CreateMap<CreateSaleDto, Sale>();
+            }
 
-            CreateMap<CreateCarDto, Car>();
+            // Fleet maps
+            {
+                CreateMap<Car, DisplayCarDto>()
+                    .ForMember(c => c.ShopNumber, a => a.MapFrom(b => b.Shop.ShopNumber));
 
-            CreateMap<CreateFuelNoteDto, FuelNote>();
+                CreateMap<FuelNote, DisplayFuelNoteDto>()
+                    .ForMember(fn => fn.Date, a => a.MapFrom(b => b.Date.ToShortDateString()))
+                    .ForMember(fn => fn.RegistrationNumber, a => a.MapFrom(b => b.Car.RegistrationNumber));
 
-            CreateMap<CreateFuelSupplyDto, FuelSupply>()
-                .ForMember(fs => fs.CurrentVolume, a => a.MapFrom(b => b.DeliveryVolume));
+                CreateMap<FuelSupply, DisplayFuelSupplyDto>()
+                    .ForMember(fs => fs.DateOfDelivery, a => a.MapFrom(b => b.DateOfDelivery.ToShortDateString()))
+                    .ForMember(fs => fs.FuelNotes, a => a.MapFrom(b => b.FuelNotes));
+
+                CreateMap<CreateCarDto, Car>();
+
+                CreateMap<CreateFuelNoteDto, FuelNote>();
+
+                CreateMap<CreateFuelSupplyDto, FuelSupply>()
+                    .ForMember(fs => fs.CurrentVolume, a => a.MapFrom(b => b.DeliveryVolume));
+            }
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using DominoAPI.Models.Create;
 
-namespace DominoAPI.Models.Update
+namespace DominoAPI.Models.Update.Butchery
 {
     public class UpdateSausageDto
     {

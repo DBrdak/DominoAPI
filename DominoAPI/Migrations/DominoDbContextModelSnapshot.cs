@@ -267,25 +267,20 @@ namespace DominoAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Address")
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("CarId")
-                        .HasColumnType("int");
 
                     b.Property<int>("ShopNumber")
                         .HasColumnType("int");
 
-                    b.Property<int>("TypeOfShop")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("CarId")
-                        .IsUnique()
-                        .HasFilter("[CarId] IS NOT NULL");
-
                     b.ToTable("Shops");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("Shop");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("DominoAPI.Entities.Variables.Carcass", b =>
@@ -318,6 +313,31 @@ namespace DominoAPI.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("Carcass");
+                });
+
+            modelBuilder.Entity("DominoAPI.Entities.Shops.MobileShop", b =>
+                {
+                    b.HasBaseType("DominoAPI.Entities.Shops.Shop");
+
+                    b.Property<int>("CarId")
+                        .HasColumnType("int");
+
+                    b.HasIndex("CarId")
+                        .IsUnique()
+                        .HasFilter("[CarId] IS NOT NULL");
+
+                    b.HasDiscriminator().HasValue("MobileShop");
+                });
+
+            modelBuilder.Entity("DominoAPI.Entities.Shops.StationaryShop", b =>
+                {
+                    b.HasBaseType("DominoAPI.Entities.Shops.Shop");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasDiscriminator().HasValue("StationaryShop");
                 });
 
             modelBuilder.Entity("DominoAPI.Entities.Accounts.User", b =>
@@ -389,16 +409,6 @@ namespace DominoAPI.Migrations
                     b.Navigation("Shop");
                 });
 
-            modelBuilder.Entity("DominoAPI.Entities.Shops.Shop", b =>
-                {
-                    b.HasOne("DominoAPI.Entities.Fleet.Car", "Car")
-                        .WithOne("Shop")
-                        .HasForeignKey("DominoAPI.Entities.Shops.Shop", "CarId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Car");
-                });
-
             modelBuilder.Entity("DominoAPI.Entities.Variables.Carcass", b =>
                 {
                     b.HasOne("DominoAPI.Entities.PriceList.Product", "Product")
@@ -408,6 +418,17 @@ namespace DominoAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("DominoAPI.Entities.Shops.MobileShop", b =>
+                {
+                    b.HasOne("DominoAPI.Entities.Fleet.Car", "Car")
+                        .WithOne("Shop")
+                        .HasForeignKey("DominoAPI.Entities.Shops.MobileShop", "CarId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Car");
                 });
 
             modelBuilder.Entity("DominoAPI.Entities.Butchery.Sausage", b =>

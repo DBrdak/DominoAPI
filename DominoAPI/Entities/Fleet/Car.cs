@@ -19,6 +19,6 @@ namespace DominoAPI.Entities.Fleet
         public int? Mileage { get; set; }
 
         public IEnumerable<FuelNote> FuelNotes { get; set; }
-        public virtual Shop? Shop { get; set; }
+        public virtual MobileShop? Shop { get; set; }
     }
 }

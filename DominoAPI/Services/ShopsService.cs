@@ -3,8 +3,9 @@ using DominoAPI.Entities;
 using DominoAPI.Entities.Shops;
 using DominoAPI.Models.Create.Shops;
 using DominoAPI.Models.Display.Shops;
-using DominoAPI.Models.Update;
+using DominoAPI.Models.Update.Shops;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
 
 namespace DominoAPI.Services
 {
@@ -12,13 +13,15 @@ namespace DominoAPI.Services
     {
         Task<List<DisplayShopDto>> GetAllShops();
 
-        Task<DisplayShopDetailsDto> GetShopDetails(int shopId);
+        Task<object> GetShopDetails(int shopId);
 
         Task<IEnumerable<DisplaySaleDto>> GetSales(int shopId);
 
         Task AddShop(CreateShopDto dto);
 
         Task AddNewSale(CreateSaleDto dto, int shopId);
+
+        Task AddNewRecentSale(CreateSaleDto dto, int shopId);
 
         Task UpdateShop(UpdateShopDto dto, int shopId);
 
@@ -44,40 +47,52 @@ namespace DominoAPI.Services
 
         public async Task<List<DisplayShopDto>> GetAllShops()
         {
-            var shops = await _dbContext.Shops
+            var mobileShops = await _dbContext.MobileShops
                 .AsNoTracking()
                 .ToListAsync();
 
-            var dto = _mapper.Map<List<DisplayShopDto>>(shops);
+            var stationaryShops = await _dbContext.StationaryShops
+                .AsNoTracking()
+                .ToListAsync();
+
+            var dto = _mapper.Map<List<DisplayShopDto>>(mobileShops);
+            dto.AddRange(_mapper.Map<List<DisplayShopDto>>(stationaryShops));
 
             return dto;
         }
 
-        public async Task<DisplayShopDetailsDto> GetShopDetails(int shopId)
+        public async Task<object> GetShopDetails(int shopId)
         {
-            var shop = await _dbContext.Shops
-                .Include(s => s.Car)
+            var mobileShop = await _dbContext.MobileShops
                 .AsNoTracking()
                 .FirstOrDefaultAsync(s => s.Id == shopId);
 
-            if (shop == null)
+            var stationaryShop = await _dbContext.StationaryShops
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.Id == shopId);
+
+            var isMobile = stationaryShop is null;
+
+            if (isMobile && !isMobile)
             {
                 throw new Exception();
             }
 
-            var shopDto = _mapper.Map<DisplayShopDetailsDto>(shop);
+            var dto = new object();
 
-            return shopDto;
+            if (isMobile) dto = _mapper.Map<DisplayMobileShopDto>(mobileShop);
+            if (!isMobile) dto = _mapper.Map<DisplayStationaryShopDto>(stationaryShop);
+
+            return dto;
         }
 
         public async Task<IEnumerable<DisplaySaleDto>> GetSales(int shopId)
         {
             var shop = await _dbContext.Shops
-                .Include(s => s.Car)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(s => s.Id == shopId);
 
-            if (shop == null)
+            if (shop is null)
             {
                 throw new Exception();
             }
@@ -87,53 +102,27 @@ namespace DominoAPI.Services
                 .Where(ss => ss.ShopId == shopId)
                 .ToListAsync();
 
-            var salesDto = _mapper.Map<IEnumerable<DisplaySaleDto>>(sales);
+            var dto = _mapper.Map<IEnumerable<DisplaySaleDto>>(sales);
 
-            return salesDto;
+            return dto;
         }
 
         public async Task AddShop(CreateShopDto dto)
         {
-            if (dto.TypeOfShop == TypeofShop.Mobile
-                && dto.Address == null)
-            {
-                var car = await _dbContext.Cars
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(c => c.Id == dto.CarId);
+            var isMobile = dto.Address is null;
 
-                if (car == null)
-                {
-                    throw new Exception();
-                }
-
-                var shop = new Shop()
-                {
-                    ShopNumber = dto.ShopNumber,
-                    TypeOfShop = dto.TypeOfShop,
-                    CarId = car.Id
-                };
-
-                await _dbContext.Shops.AddAsync(shop);
-                await _dbContext.SaveChangesAsync();
-            }
-            else if (dto.TypeOfShop == TypeofShop.Stationary
-                     && dto.CarId == null
-                     && dto.Address != null)
-            {
-                var shop = new Shop()
-                {
-                    ShopNumber = dto.ShopNumber,
-                    TypeOfShop = dto.TypeOfShop,
-                    Address = dto.Address
-                };
-
-                await _dbContext.Shops.AddAsync(shop);
-                await _dbContext.SaveChangesAsync();
-            }
-            else
+            if (isMobile && !isMobile)
             {
                 throw new Exception();
             }
+
+            var newShop = new object();
+
+            if (isMobile) newShop = _mapper.Map<MobileShop>(dto);
+            if (!isMobile) newShop = _mapper.Map<StationaryShop>(dto);
+
+            await _dbContext.AddAsync(newShop);
+            await _dbContext.SaveChangesAsync();
         }
 
         public async Task AddNewSale(CreateSaleDto dto, int shopId)
@@ -147,73 +136,69 @@ namespace DominoAPI.Services
                 .AsNoTracking()
                 .FirstOrDefaultAsync(s => s.Id == shopId);
 
-            if (shop == null)
+            if (shop is null)
             {
                 throw new Exception();
             }
 
-            var sale = new Sale()
-            {
-                Bills = dto.Bills,
-                Date = dto.Date,
-                SaleAmount = dto.SaleAmount,
-                ShopId = shop.Id
-            };
+            var newSale = _mapper.Map<Sale>(dto);
 
-            await _dbContext.Sales.AddAsync(sale);
+            newSale.ShopId = shopId;
+
+            await _dbContext.Sales.AddAsync(newSale);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task AddNewRecentSale(CreateSaleDto dto, int shopId)
+        {
+            var shop = await _dbContext.Shops
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.Id == shopId);
+
+            if (shop is null)
+            {
+                throw new Exception();
+            }
+
+            dto.Date = DateTime.Now;
+
+            var newSale = _mapper.Map<Sale>(dto);
+
+            newSale.ShopId = shopId;
+
+            await _dbContext.Sales.AddAsync(newSale);
             await _dbContext.SaveChangesAsync();
         }
 
         public async Task UpdateShop(UpdateShopDto dto, int shopId)
         {
-            var shop = await _dbContext.Shops
-                .FirstOrDefaultAsync(s => s.Id == shopId);
+            var shop = new object();
 
-            if (shop == null)
+            shop = await _dbContext.MobileShops
+                .FirstOrDefaultAsync(s => s.Id == shopId);
+            var isMobile = true;
+
+            if (shop is null)
+            {
+                shop = await _dbContext.StationaryShops
+                    .FirstOrDefaultAsync(s => s.Id == shopId);
+                isMobile = false;
+            }
+
+            if (shop is null)
             {
                 throw new Exception();
             }
 
-            if (dto.TypeofShop == TypeofShop.Mobile && shop.TypeOfShop != TypeofShop.Mobile)
+            if (isMobile)
             {
-                var car = await _dbContext.Cars
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(c => c.Id == dto.CarId);
-
-                if (car == null)
-                {
-                    throw new Exception();
-                }
-
-                shop.CarId = dto.CarId;
-                shop.TypeOfShop = TypeofShop.Mobile;
+                dto.Address = null;
+                dto.MapTo(shop);
             }
-            else if (dto.TypeofShop == TypeofShop.Stationary && shop.TypeOfShop != TypeofShop.Stationary)
+            else
             {
-                shop.Address = dto.Address;
-                shop.TypeOfShop = TypeofShop.Stationary;
-            }
-            else if (shop.TypeOfShop == TypeofShop.Mobile && dto.CarId != null)
-            {
-                var car = await _dbContext.Cars
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(c => c.Id == dto.CarId);
-
-                if (car == null)
-                {
-                    throw new Exception();
-                }
-
-                shop.CarId = dto.CarId;
-            }
-            else if (shop.TypeOfShop == TypeofShop.Stationary && dto.Address != null)
-            {
-                shop.Address = dto.Address;
-            }
-
-            if (dto.ShopNumber != null)
-            {
-                shop.ShopNumber = (int)dto.ShopNumber;
+                dto.CarId = null;
+                dto.MapTo(shop);
             }
 
             _dbContext.Update(shop);
@@ -223,10 +208,10 @@ namespace DominoAPI.Services
         public async Task DeleteShop(int shopId)
         {
             var shop = await _dbContext.Shops
-                .Include(s => s.Sales)
+                //.Include(s => s.Sales)
                 .FirstOrDefaultAsync(s => s.Id == shopId);
 
-            if (shop == null)
+            if (shop is null)
             {
                 throw new Exception();
             }
@@ -241,7 +226,7 @@ namespace DominoAPI.Services
                 .Include(s => s.Sales)
                 .FirstOrDefaultAsync(s => s.Id == shopId);
 
-            if (shop == null)
+            if (shop is null)
             {
                 throw new Exception();
             }
@@ -249,7 +234,7 @@ namespace DominoAPI.Services
             var sale = shop.Sales
                 .FirstOrDefault(ss => ss.Id == saleId);
 
-            if (sale == null)
+            if (sale is null)
             {
                 throw new Exception();
             }
@@ -273,9 +258,10 @@ namespace DominoAPI.Services
 
             foreach (var saleId in salesId)
             {
-                var sale = shop.Sales.FirstOrDefault(ss => ss.Id == saleId);
+                var sale = shop.Sales
+                    .FirstOrDefault(ss => ss.Id == saleId);
 
-                if (sale == null)
+                if (sale is null)
                 {
                     throw new Exception();
                 }
@@ -290,11 +276,10 @@ namespace DominoAPI.Services
         public async Task DeleteAllSales(int shopId)
         {
             var shop = await _dbContext.Shops
-                .Include(s => s.Sales)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(s => s.Id == shopId);
 
-            if (shop == null)
+            if (shop is null)
             {
                 throw new Exception();
             }

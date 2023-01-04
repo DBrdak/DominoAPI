@@ -4,7 +4,7 @@ using DominoAPI.Entities.Butchery;
 using DominoAPI.Entities.PriceList;
 using DominoAPI.Models.Create;
 using DominoAPI.Models.Display.Butchery;
-using DominoAPI.Models.Update;
+using DominoAPI.Models.Update.Butchery;
 using Microsoft.EntityFrameworkCore;
 
 namespace DominoAPI.Services
@@ -152,24 +152,23 @@ namespace DominoAPI.Services
                 sausage.Yield = (float)dto.Yield;
             }
 
-            if (dto.Ingredients != null
-                && (int)dto.Ingredients.Select(i => i.Content).Sum() == 1)
+            if (dto.Ingredients != null &&
+                (int)dto.Ingredients.Select(i => i.Content).Sum() == 1)
             {
                 _dbContext.Ingredients.RemoveRange(sausage.Ingredients);
 
-                sausage.Ingredients.Clear();
-
                 foreach (var ingredient in dto.Ingredients)
                 {
-                    if (await _dbContext.Products.AsNoTracking()
-                            .FirstOrDefaultAsync(p => p.Id == ingredient.ProductId) == null)
+                    var product = await _dbContext.Products
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(p => p.Id == ingredient.ProductId);
+
+                    if (product is null)
                     {
                         throw new Exception();
                     }
 
-                    ingredient.Product = await _dbContext.Products
-                        .AsNoTracking()
-                        .FirstOrDefaultAsync(p => p.Id == ingredient.ProductId);
+                    ingredient.Product = product;
                 }
             }
 

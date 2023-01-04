@@ -2,9 +2,9 @@
 using DominoAPI.Entities;
 using DominoAPI.Entities.Butchery;
 using DominoAPI.Entities.PriceList;
-using DominoAPI.Models;
 using DominoAPI.Models.Create.PriceList;
 using DominoAPI.Models.Display.Fleet;
+using DominoAPI.Models.Update.PriceList;
 using Microsoft.EntityFrameworkCore;
 
 namespace DominoAPI.Services
@@ -64,15 +64,15 @@ namespace DominoAPI.Services
                 throw new Exception();
             }
 
-            if (dto.Name != null)
+            if (dto.Name is not null)
             {
                 product.Name = dto.Name;
             }
-            if (dto.Price != null)
+            if (dto.Price is not null)
             {
                 product.Price = (float)dto.Price;
             }
-            if (dto.ProductType != null && product.Sausage == null && !product.Ingredient.Any())
+            if (dto.ProductType is not null && product.Sausage is null && !product.Ingredient.Any())
             {
                 product.ProductType = (ProductType)dto.ProductType;
             }

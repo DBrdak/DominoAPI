@@ -18,6 +18,8 @@ namespace DominoAPI.Entities
         public DbSet<Ingredient> Ingredients { get; set; }
         public DbSet<Sale> Sales { get; set; }
         public DbSet<Shop> Shops { get; set; }
+        public DbSet<MobileShop> MobileShops { get; set; }
+        public DbSet<StationaryShop> StationaryShops { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Car> Cars { get; set; }
@@ -43,7 +45,7 @@ namespace DominoAPI.Entities
                 .WithOne(ss => ss.Shop)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<Shop>()
+            modelBuilder.Entity<MobileShop>()
                 .HasOne(s => s.Car)
                 .WithOne(c => c.Shop)
                 .OnDelete(DeleteBehavior.Restrict);

@@ -1,6 +1,6 @@
 ﻿using DominoAPI.Entities.PriceList;
 
-namespace DominoAPI.Models
+namespace DominoAPI.Models.Update.PriceList
 {
     public class UpdateProductDto
     {
