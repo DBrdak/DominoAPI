@@ -2,6 +2,7 @@
 using DominoAPI.Entities;
 using DominoAPI.Entities.Butchery;
 using DominoAPI.Entities.PriceList;
+using DominoAPI.Exceptions;
 using DominoAPI.Models.Create.PriceList;
 using DominoAPI.Models.Display.Fleet;
 using DominoAPI.Models.Update.PriceList;
@@ -37,6 +38,7 @@ namespace DominoAPI.Services
         {
             var products = await _dbContext.Products
                 .Where(p => p.ProductType == productType)
+                .OrderBy(p => p.Name)
                 .AsNoTracking()
                 .ToListAsync();
 
@@ -63,7 +65,7 @@ namespace DominoAPI.Services
 
             if (product is null)
             {
-                throw new Exception();
+                throw new NotFoundException("Content not found");
             }
 
             if (dto.Name is not null)
@@ -93,12 +95,12 @@ namespace DominoAPI.Services
 
             if (product is null)
             {
-                throw new Exception();
+                throw new NotFoundException("Content not found");
             }
 
             if (!product.Ingredient.Any())
             {
-                throw new Exception();
+                throw new BadRequestException("Product cannot be deleted");
             }
 
             _dbContext.Products.Remove(product);

@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using DominoAPI.Entities;
 using DominoAPI.Entities.Shops;
+using DominoAPI.Exceptions;
 using DominoAPI.Models.Create.Shops;
 using DominoAPI.Models.Display.Shops;
+using DominoAPI.Models.Query;
 using DominoAPI.Models.Update.Shops;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
@@ -16,7 +18,7 @@ namespace DominoAPI.Services
 
         Task<object> GetShopDetails(int shopId);
 
-        Task<IEnumerable<DisplaySaleDto>> GetSales(int shopId);
+        Task<IEnumerable<DisplaySaleDto>> GetSales(int shopId, QueryParams query);
 
         Task AddShop(CreateShopDto dto);
 
@@ -78,7 +80,7 @@ namespace DominoAPI.Services
 
             if (isMobile && !isMobile)
             {
-                throw new Exception();
+                throw new NotFoundException("Content not found");
             }
 
             var dto = new object();
@@ -89,7 +91,7 @@ namespace DominoAPI.Services
             return dto;
         }
 
-        public async Task<IEnumerable<DisplaySaleDto>> GetSales(int shopId)
+        public async Task<IEnumerable<DisplaySaleDto>> GetSales(int shopId, QueryParams query)
         {
             var shop = await _dbContext.Shops
                 .AsNoTracking()
@@ -97,13 +99,24 @@ namespace DominoAPI.Services
 
             if (shop is null)
             {
-                throw new Exception();
+                throw new NotFoundException("Content not found");
             }
+
+            DateTime.TryParse(query.SearchPhrase, out var dateOfSale);
 
             var sales = await _dbContext.Sales
                 .AsNoTracking()
                 .Where(ss => ss.ShopId == shopId)
+                .Where(ss => query.SearchPhrase == null ||
+                    (ss.Date >= dateOfSale && ss.Date < dateOfSale.AddDays(1)))
+                .Skip(query.PageSize * (query.PageId - 1))
+                .Take(query.PageSize)
                 .ToListAsync();
+
+            if (!sales.Any())
+            {
+                throw new NotFoundException("Content not found");
+            }
 
             var dto = _mapper.Map<IEnumerable<DisplaySaleDto>>(sales);
 
@@ -116,7 +129,7 @@ namespace DominoAPI.Services
 
             if (isMobile && !isMobile)
             {
-                throw new Exception();
+                throw new BadRequestException("Invalid shop details");
             }
 
             var newShop = new object();
@@ -132,7 +145,7 @@ namespace DominoAPI.Services
         {
             if (dto.Date > DateTime.Now)
             {
-                throw new Exception();
+                throw new BadRequestException("Wrong date");
             }
 
             var shop = await _dbContext.Shops
@@ -141,7 +154,7 @@ namespace DominoAPI.Services
 
             if (shop is null)
             {
-                throw new Exception();
+                throw new NotFoundException("Content not found");
             }
 
             var newSale = _mapper.Map<Sale>(dto);
@@ -160,7 +173,7 @@ namespace DominoAPI.Services
 
             if (shop is null)
             {
-                throw new Exception();
+                throw new NotFoundException("Content not found");
             }
 
             dto.Date = DateTime.Now;
@@ -190,7 +203,7 @@ namespace DominoAPI.Services
 
             if (shop is null)
             {
-                throw new Exception();
+                throw new NotFoundException("Content not found");
             }
 
             if (isMobile)
@@ -216,7 +229,7 @@ namespace DominoAPI.Services
 
             if (shop is null)
             {
-                throw new Exception();
+                throw new NotFoundException("Content not found");
             }
 
             _dbContext.Remove(shop);
@@ -231,7 +244,7 @@ namespace DominoAPI.Services
 
             if (shop is null)
             {
-                throw new Exception();
+                throw new NotFoundException("Content not found");
             }
 
             var sale = shop.Sales
@@ -239,7 +252,7 @@ namespace DominoAPI.Services
 
             if (sale is null)
             {
-                throw new Exception();
+                throw new NotFoundException("Content not found");
             }
 
             _dbContext.Sales.Remove(sale);
@@ -254,7 +267,7 @@ namespace DominoAPI.Services
 
             if (shop == null)
             {
-                throw new Exception();
+                throw new NotFoundException("Content not found");
             }
 
             var sales = new List<Sale>();
@@ -266,7 +279,7 @@ namespace DominoAPI.Services
 
                 if (sale is null)
                 {
-                    throw new Exception();
+                    throw new NotFoundException("Content not found");
                 }
 
                 sales.Add(sale);
@@ -284,7 +297,7 @@ namespace DominoAPI.Services
 
             if (shop is null)
             {
-                throw new Exception();
+                throw new NotFoundException("Content not found");
             }
 
             var sales = await _dbContext.Sales

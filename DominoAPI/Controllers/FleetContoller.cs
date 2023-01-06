@@ -1,4 +1,5 @@
 ﻿using DominoAPI.Models.Create.Fleet;
+using DominoAPI.Models.Query;
 using DominoAPI.Models.Update.Fleet;
 using DominoAPI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -25,17 +26,17 @@ namespace DominoAPI.Controllers
         }
 
         [HttpGet("fuel-supply")]
-        public async Task<IActionResult> GetAllFuelSupplies()
+        public async Task<IActionResult> GetAllFuelSupplies([FromQuery] QueryParams query)
         {
-            var fuelNotes = await _fleetService.GetAllFuelSupplies();
+            var fuelNotes = await _fleetService.GetAllFuelSupplies(query);
 
             return Ok(fuelNotes);
         }
 
         [HttpGet("fuel-supply/{fuelSupplyId}/fuel-notes")]
-        public async Task<IActionResult> GetFuelNotes([FromRoute] int fuelSupplyId)
+        public async Task<IActionResult> GetFuelNotes([FromRoute] int fuelSupplyId, [FromQuery] QueryParams query)
         {
-            var fuelNotes = await _fleetService.GetFuelNotes(fuelSupplyId);
+            var fuelNotes = await _fleetService.GetFuelNotes(fuelSupplyId, query);
 
             return Ok(fuelNotes);
         }

@@ -1,10 +1,12 @@
-﻿using System.Reflection;
+﻿using System.Data;
+using System.Reflection;
 using AutoMapper;
 using DominoAPI.Entities;
 using DominoAPI.Entities.Fleet;
 using DominoAPI.Exceptions;
 using DominoAPI.Models.Create.Fleet;
 using DominoAPI.Models.Display.Fleet;
+using DominoAPI.Models.Query;
 using DominoAPI.Models.Update.Fleet;
 using FluentValidation.Validators;
 using Microsoft.AspNetCore.Identity;
@@ -17,9 +19,9 @@ namespace DominoAPI.Services
     {
         Task<IEnumerable<DisplayCarDto>> GetAllCars();
 
-        Task<IEnumerable<DisplayFuelSupplyDto>> GetAllFuelSupplies();
+        Task<PagedResult<DisplayFuelSupplyDto>> GetAllFuelSupplies(QueryParams query);
 
-        Task<DisplayFuelSupplyDto> GetFuelNotes(int fuelSupplyId);
+        Task<PagedResult<DisplayFuelNoteDto>> GetFuelNotes(int fuelSupplyId, QueryParams query);
 
         Task AddCar(CreateCarDto dto);
 
@@ -73,33 +75,59 @@ namespace DominoAPI.Services
             return dto;
         }
 
-        public async Task<IEnumerable<DisplayFuelSupplyDto>> GetAllFuelSupplies()
+        public async Task<PagedResult<DisplayFuelSupplyDto>> GetAllFuelSupplies(QueryParams query)
         {
-            var fuelSupplies = await _dbContext.FuelSupplies
+            DateTime.TryParse(query.SearchPhrase, out var dateOfDelivery);
+
+            var baseFuelSupplies = await _dbContext.FuelSupplies
                 .AsNoTracking()
+                .OrderByDescending(fs => fs.DateOfDelivery)
                 .ToListAsync();
 
-            var dto = _mapper.Map<List<DisplayFuelSupplyDto>>(fuelSupplies);
+            var fuelSupplies = baseFuelSupplies
+                .Where(fs => query.SearchPhrase == null
+                             || (fs.DateOfDelivery >= dateOfDelivery &&
+                                 fs.DateOfDelivery < dateOfDelivery.AddDays(1)))
+                .Skip((query.PageSize * (query.PageId - 1)))
+                .Take(query.PageSize);
 
-            return dto;
-        }
-
-        public async Task<DisplayFuelSupplyDto> GetFuelNotes(int fuelSupplyId)
-        {
-            var fuelSupply = await _dbContext.FuelSupplies
-                .Include(fs => fs.FuelNotes)
-                .ThenInclude(fn => fn.Car)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(fs => fs.Id == fuelSupplyId);
-
-            if (fuelSupply == null)
+            if (!fuelSupplies.Any())
             {
                 throw new NotFoundException("Content not found");
             }
 
-            var dto = _mapper.Map<DisplayFuelSupplyDto>(fuelSupply);
+            var dto = _mapper.Map<List<DisplayFuelSupplyDto>>(fuelSupplies);
 
-            return dto;
+            var result =
+                new PagedResult<DisplayFuelSupplyDto>(dto, baseFuelSupplies.Count, query.PageSize, query.PageId);
+
+            return result;
+        }
+
+        public async Task<PagedResult<DisplayFuelNoteDto>> GetFuelNotes(int fuelSupplyId, QueryParams query)
+        {
+            var baseFuelNotes = await _dbContext.FuelNotes
+                .Include(fn => fn.Car)
+                .AsNoTracking()
+                .Where(fn => fn.FuelSupplyId == fuelSupplyId)
+                .ToListAsync();
+
+            var fuelNotes = baseFuelNotes
+                .Where(fn => query.SearchPhrase == null ||
+                             fn.Car.RegistrationNumber == query.SearchPhrase)
+                .Skip(query.PageSize * (query.PageId - 1))
+                .Take(query.PageSize);
+
+            if (!fuelNotes.Any())
+            {
+                throw new NotFoundException("Content not found");
+            }
+
+            var dto = _mapper.Map<IList<DisplayFuelNoteDto>>(fuelNotes);
+
+            var result = new PagedResult<DisplayFuelNoteDto>(dto, baseFuelNotes.Count, query.PageSize, query.PageId);
+
+            return result;
         }
 
         public async Task AddCar(CreateCarDto dto)
@@ -119,7 +147,7 @@ namespace DominoAPI.Services
 
             if (lastfuelSupply is not null && (dto.DateOfDelivery > DateTime.UtcNow || dto.DateOfDelivery < lastfuelSupply.DateOfDelivery))
             {
-                throw new Exception();
+                throw new BadRequestException("Wrong date insert");
             }
 
             var newFuelSupply = _mapper.Map<FuelSupply>(dto);
@@ -135,9 +163,13 @@ namespace DominoAPI.Services
                 .AsNoTracking()
                 .LastOrDefaultAsync();
 
-            if (lastFuelSupply is null)
+            var car = await _dbContext.Cars
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == dto.CarId);
+
+            if (lastFuelSupply is null || car is null)
             {
-                throw new Exception();
+                throw new NotFoundException("Content not found");
             }
 
             dto.Date = DateTime.Now;
@@ -159,9 +191,13 @@ namespace DominoAPI.Services
                 .AsNoTracking()
                 .FirstOrDefaultAsync(fs => fs.Id == fuelSupplyId);
 
-            if (fuelSupply is null)
+            var car = await _dbContext.Cars
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == dto.CarId);
+
+            if (fuelSupply is null || car is null)
             {
-                throw new Exception();
+                throw new NotFoundException("Content not found");
             }
 
             var newFuelNote = _mapper.Map<FuelNote>(dto);
@@ -181,7 +217,7 @@ namespace DominoAPI.Services
 
             if (car is null)
             {
-                throw new Exception();
+                throw new NotFoundException("Content not found");
             }
 
             car.Note = note;
@@ -197,7 +233,7 @@ namespace DominoAPI.Services
 
             if (car is null)
             {
-                throw new Exception();
+                throw new NotFoundException("Content not found");
             }
 
             dto.MapTo(car);
@@ -213,12 +249,12 @@ namespace DominoAPI.Services
 
             if (fuelSupply is null)
             {
-                throw new Exception();
+                throw new NotFoundException("Content not found");
             }
 
             if (dto.DateOfDelivery > DateTime.UtcNow)
             {
-                throw new Exception();
+                throw new BadRequestException("Wrong date insert");
             }
 
             dto.MapTo(fuelSupply);
@@ -239,12 +275,12 @@ namespace DominoAPI.Services
 
             if (fuelNote is null || fuelSupply is null)
             {
-                throw new Exception();
+                throw new NotFoundException("Content not found");
             }
 
             if (dto.Date > DateTime.UtcNow || dto.Date < fuelSupply.DateOfDelivery)
             {
-                throw new Exception();
+                throw new BadRequestException("Wrong date insert");
             }
 
             if (dto.CarId is not null)
@@ -255,7 +291,7 @@ namespace DominoAPI.Services
 
                 if (car is null)
                 {
-                    throw new Exception();
+                    throw new NotFoundException("Content not found");
                 }
             }
 
@@ -273,7 +309,7 @@ namespace DominoAPI.Services
 
             if (car is null)
             {
-                throw new Exception();
+                throw new NotFoundException("Content not found");
             }
 
             _dbContext.Remove(car);
@@ -287,7 +323,7 @@ namespace DominoAPI.Services
 
             if (fuelSupply is null)
             {
-                throw new Exception();
+                throw new NotFoundException("Content not found");
             }
 
             _dbContext.Remove(fuelSupply);
@@ -306,7 +342,7 @@ namespace DominoAPI.Services
 
             if (fuelNote is null || fuelSupply is null)
             {
-                throw new Exception();
+                throw new NotFoundException("Content not found");
             }
 
             _dbContext.Remove(fuelNote);
@@ -322,7 +358,7 @@ namespace DominoAPI.Services
 
             if (fuelSupply is null)
             {
-                throw new Exception();
+                throw new NotFoundException("Content not found");
             }
 
             var fuelNotes = new List<FuelNote>();
@@ -334,7 +370,7 @@ namespace DominoAPI.Services
 
                 if (fuelNote is null)
                 {
-                    throw new Exception();
+                    throw new NotFoundException("Content not found");
                 }
 
                 fuelNotes.Add(fuelNote);
@@ -353,7 +389,7 @@ namespace DominoAPI.Services
 
             if (fuelSupply is null)
             {
-                throw new Exception();
+                throw new NotFoundException("Content not found");
             }
 
             _dbContext.RemoveRange(fuelSupply.FuelNotes);

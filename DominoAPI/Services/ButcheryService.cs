@@ -12,7 +12,7 @@ namespace DominoAPI.Services
 {
     public interface IButcheryService
     {
-        Task<List<DisplaySausageDto>> GetAllSausages();
+        Task<List<DisplaySausageDto>> GetAllSausages(string? sausageNameQuery);
 
         Task<DisplaySausageDto> GetSausage(int sausageId);
 
@@ -38,12 +38,19 @@ namespace DominoAPI.Services
             _logger = logger;
         }
 
-        public async Task<List<DisplaySausageDto>> GetAllSausages()
+        public async Task<List<DisplaySausageDto>> GetAllSausages(string? sausageNameQuery)
         {
             var sausages = await _dbContext.Sausages
                 .Include(s => s.Product)
                 .AsNoTracking()
+                .Where(s => sausageNameQuery == null ||
+                    s.Product.Name.ToLower().Replace(" ", "") == sausageNameQuery.ToLower().Replace(" ", ""))
                 .ToListAsync();
+
+            if (!sausages.Any())
+            {
+                throw new NotFoundException("Content not found");
+            }
 
             var sausageDtos = _mapper.Map<List<DisplaySausageDto>>(sausages);
 
@@ -96,8 +103,7 @@ namespace DominoAPI.Services
 
             if (product is null
                 || product.Sausage != null
-                || product.ProductType != ProductType.Sausage
-                || (int)dto.Ingredients.Select(i => i.Content).Sum() != 1)
+                || product.ProductType != ProductType.Sausage)
             {
                 throw new NotFoundException("Content not found");
             }
@@ -113,8 +119,6 @@ namespace DominoAPI.Services
                     throw new BadRequestException("Wrong input");
                 }
             }
-
-            var newIngredients = _mapper.Map<List<Ingredient>>(dto.Ingredients);
 
             var newSausage = _mapper.Map<Sausage>(dto);
 

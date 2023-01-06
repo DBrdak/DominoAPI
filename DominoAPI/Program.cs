@@ -1,6 +1,9 @@
 using DominoAPI.Entities;
 using DominoAPI.Middleware;
+using DominoAPI.Models.Query;
 using DominoAPI.Services;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using NLog;
 using NLog.Web;
 
@@ -29,9 +32,12 @@ namespace DominoAPI
                 builder.Services.AddScoped<IFleetService, FleetService>();
 
                 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+                builder.Services.AddControllers().AddFluentValidation();
 
                 builder.Services.AddScoped<RequestTimeMiddleware>();
                 builder.Services.AddScoped<ErrorHandlingMiddleware>();
+
+                builder.Services.AddScoped<IValidator<QueryParams>, FleetQueryValidator>();
 
                 builder.Logging.ClearProviders();
                 builder.Logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);

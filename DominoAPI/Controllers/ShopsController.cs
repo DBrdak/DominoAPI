@@ -1,4 +1,5 @@
 ﻿using DominoAPI.Models.Create.Shops;
+using DominoAPI.Models.Query;
 using DominoAPI.Models.Update.Shops;
 using DominoAPI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -34,9 +35,9 @@ namespace DominoAPI.Controllers
         }
 
         [HttpGet("{shopId}/sales")]
-        public async Task<IActionResult> GetSales([FromRoute] int shopId)
+        public async Task<IActionResult> GetSales([FromRoute] int shopId, [FromQuery] QueryParams query)
         {
-            var shop = await _shopsService.GetSales(shopId);
+            var shop = await _shopsService.GetSales(shopId, query);
 
             return Ok(shop);
         }

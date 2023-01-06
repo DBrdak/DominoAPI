@@ -21,9 +21,9 @@ namespace DominoAPI.Controllers
         }
 
         [HttpGet("sausages")]
-        public async Task<IActionResult> GetAllSausages()
+        public async Task<IActionResult> GetAllSausages([FromQuery] string? sausageNameQuery)
         {
-            var sausages = await _butcheryService.GetAllSausages();
+            var sausages = await _butcheryService.GetAllSausages(sausageNameQuery);
 
             return Ok(sausages);
         }
