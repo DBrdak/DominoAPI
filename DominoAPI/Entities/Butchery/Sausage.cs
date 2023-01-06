@@ -5,7 +5,8 @@ namespace DominoAPI.Entities.Butchery;
 public class Sausage
 {
     public int Id { get; set; }
-    public float Yield { get; set; }
+
+    public float Yield;
 
     public IList<Ingredient> Ingredients { get; set; }
 

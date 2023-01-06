@@ -12,7 +12,7 @@
     "DominoAPI": {
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "launchBrowser": false,
+      "launchBrowser": true,
       "launchUrl": "dominoAPI",
       "applicationUrl": "https://localhost:7237;http://localhost:5082",
       "environmentVariables": {

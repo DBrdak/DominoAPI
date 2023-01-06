@@ -2,12 +2,14 @@
 using AutoMapper;
 using DominoAPI.Entities;
 using DominoAPI.Entities.Fleet;
+using DominoAPI.Exceptions;
 using DominoAPI.Models.Create.Fleet;
 using DominoAPI.Models.Display.Fleet;
 using DominoAPI.Models.Update.Fleet;
 using FluentValidation.Validators;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using UtilityLibrary;
 
 namespace DominoAPI.Services
 {
@@ -50,11 +52,13 @@ namespace DominoAPI.Services
     {
         private readonly DominoDbContext _dbContext;
         private readonly IMapper _mapper;
+        private readonly ILogger<FleetService> _logger;
 
-        public FleetService(IMapper mapper, DominoDbContext dbContext)
+        public FleetService(IMapper mapper, DominoDbContext dbContext, ILogger<FleetService> logger)
         {
             _dbContext = dbContext;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<IEnumerable<DisplayCarDto>> GetAllCars()
@@ -90,7 +94,7 @@ namespace DominoAPI.Services
 
             if (fuelSupply == null)
             {
-                throw new Exception();
+                throw new NotFoundException("Content not found");
             }
 
             var dto = _mapper.Map<DisplayFuelSupplyDto>(fuelSupply);

@@ -1,7 +1,6 @@
 ﻿using DominoAPI.Entities.Accounts;
 using DominoAPI.Entities.Butchery;
 using DominoAPI.Entities.Shops;
-using DominoAPI.Entities.Variables;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 using DominoAPI.Entities.Fleet;
@@ -13,7 +12,6 @@ namespace DominoAPI.Entities
     public class DominoDbContext : DbContext
     {
         public DbSet<Product> Products { get; set; }
-        public DbSet<Carcass> Carcass { get; set; }
         public DbSet<Sausage> Sausages { get; set; }
         public DbSet<Ingredient> Ingredients { get; set; }
         public DbSet<Sale> Sales { get; set; }
@@ -44,11 +42,6 @@ namespace DominoAPI.Entities
                 .HasMany(s => s.Sales)
                 .WithOne(ss => ss.Shop)
                 .OnDelete(DeleteBehavior.Cascade);
-
-            //modelBuilder.Entity<MobileShop>()
-            //    .HasOne(s => s.Car)
-            //    .WithOne(c => c.Shop)
-            //    .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Car>()
                 .HasOne(c => c.Shop)

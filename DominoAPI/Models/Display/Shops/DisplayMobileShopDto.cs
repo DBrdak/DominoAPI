@@ -6,6 +6,6 @@ namespace DominoAPI.Models.Display.Shops
     public class DisplayMobileShopDto : DisplayShopDto
     {
         public string RegistrationNumber { get; set; }
-        public List<DisplaySaleDto> Sales { get; set; }
+        public IList<DisplaySaleDto> Sales { get; set; }
     }
 }

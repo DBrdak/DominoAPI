@@ -1,51 +1,87 @@
 using DominoAPI.Entities;
+using DominoAPI.Middleware;
 using DominoAPI.Services;
+using NLog;
+using NLog.Web;
 
 namespace DominoAPI
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
+            var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
+            logger.Debug("init main");
 
-            builder.Services.AddControllers();
-
-            builder.Services.AddDbContext<DominoDbContext>();
-
-            builder.Services.AddScoped<Seeder>();
-
-            builder.Services.AddScoped<IPriceListService, PriceListService>();
-            builder.Services.AddScoped<IButcheryService, ButcheryService>();
-            builder.Services.AddScoped<IShopsService, ShopsService>();
-            builder.Services.AddScoped<IFleetService, FleetService>();
-
-            builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
-            var app = builder.Build();
-
-            void SeedDatabase()
+            try
             {
-                using var scope = app.Services.CreateScope();
-                try
+                var builder = WebApplication.CreateBuilder(args);
+
+                builder.Services.AddControllers();
+
+                builder.Services.AddDbContext<DominoDbContext>();
+
+                builder.Services.AddScoped<Seeder>();
+
+                builder.Services.AddScoped<IButcheryService, ButcheryService>();
+                builder.Services.AddScoped<IPriceListService, PriceListService>();
+                builder.Services.AddScoped<IShopsService, ShopsService>();
+                builder.Services.AddScoped<IFleetService, FleetService>();
+
+                builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+                builder.Services.AddScoped<RequestTimeMiddleware>();
+                builder.Services.AddScoped<ErrorHandlingMiddleware>();
+
+                builder.Logging.ClearProviders();
+                builder.Logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
+                builder.Host.UseNLog();
+
+                builder.Services.AddSwaggerGen();
+
+                var app = builder.Build();
+
+                void SeedDatabase()
                 {
-                    var scopedContext = scope.ServiceProvider.GetRequiredService<DominoDbContext>();
-                    Seeder.Seed(scopedContext);
+                    using var scope = app.Services.CreateScope();
+                    try
+                    {
+                        var scopedContext = scope.ServiceProvider.GetRequiredService<DominoDbContext>();
+                        Seeder.Seed(scopedContext);
+                    }
+                    catch
+                    {
+                        throw;
+                    }
                 }
-                catch
+                SeedDatabase();
+
+                app.UseMiddleware<RequestTimeMiddleware>();
+                app.UseMiddleware<ErrorHandlingMiddleware>();
+
+                app.UseHttpsRedirection();
+
+                app.UseSwagger();
+                app.UseSwaggerUI(c =>
                 {
-                    throw;
-                }
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "DominoAPI");
+                });
+
+                app.UseAuthorization();
+
+                app.MapControllers();
+
+                await app.RunAsync();
             }
-            SeedDatabase();
-
-            //app.UseHttpsRedirection();
-
-            app.UseAuthorization();
-
-            app.MapControllers();
-
-            app.Run();
+            catch (Exception exception)
+            {
+                logger.Error(exception, "Stopped program because of exception");
+                throw;
+            }
+            finally
+            {
+                NLog.LogManager.Shutdown();
+            }
         }
     }
 }

@@ -7,7 +7,19 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Logs\**" />
+	  <Content Remove="Logs\**" />
+	  <EmbeddedResource Remove="Logs\**" />
+	  <None Remove="Logs\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Remove="NLog.config" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
+		<PackageReference Include="Duende.IdentityServer" Version="6.2.0" />
 		<PackageReference Include="FluentValidation" Version="11.4.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.1" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.1" />
@@ -19,5 +31,13 @@
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
 		<PackageReference Include="NLog.Web.AspNetCore" Version="5.2.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="NLog.config" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\UtilityLibrary\UtilityLibrary.csproj" />
 	</ItemGroup>
 </Project>

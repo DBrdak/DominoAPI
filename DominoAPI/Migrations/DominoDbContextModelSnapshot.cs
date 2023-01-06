@@ -283,38 +283,6 @@ namespace DominoAPI.Migrations
                     b.UseTphMappingStrategy();
                 });
 
-            modelBuilder.Entity("DominoAPI.Entities.Variables.Carcass", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Class")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Part")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ProductName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<float>("ProductPercentage")
-                        .HasColumnType("real");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("Carcass");
-                });
-
             modelBuilder.Entity("DominoAPI.Entities.Shops.MobileShop", b =>
                 {
                     b.HasBaseType("DominoAPI.Entities.Shops.Shop");
@@ -409,23 +377,12 @@ namespace DominoAPI.Migrations
                     b.Navigation("Shop");
                 });
 
-            modelBuilder.Entity("DominoAPI.Entities.Variables.Carcass", b =>
-                {
-                    b.HasOne("DominoAPI.Entities.PriceList.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Product");
-                });
-
             modelBuilder.Entity("DominoAPI.Entities.Shops.MobileShop", b =>
                 {
                     b.HasOne("DominoAPI.Entities.Fleet.Car", "Car")
                         .WithOne("Shop")
                         .HasForeignKey("DominoAPI.Entities.Shops.MobileShop", "CarId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Car");

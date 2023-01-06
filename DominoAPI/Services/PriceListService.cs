@@ -24,11 +24,13 @@ namespace DominoAPI.Services
     {
         private readonly DominoDbContext _dbContext;
         private readonly IMapper _mapper;
+        private readonly ILogger<PriceListService> _logger;
 
-        public PriceListService(DominoDbContext dbContext, IMapper mapper)
+        public PriceListService(DominoDbContext dbContext, IMapper mapper, ILogger<PriceListService> logger)
         {
             _dbContext = dbContext;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<List<DisplayProductDto>> GetAllProducts(ProductType productType)

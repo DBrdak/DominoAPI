@@ -3,6 +3,6 @@
     public class DisplayStationaryShopDto : DisplayShopDto
     {
         public string Address { get; set; }
-        public List<DisplaySaleDto> Sales { get; set; }
+        public IList<DisplaySaleDto> Sales { get; set; }
     }
 }

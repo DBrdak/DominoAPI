@@ -2,6 +2,7 @@
 using DominoAPI.Entities;
 using DominoAPI.Entities.Butchery;
 using DominoAPI.Entities.PriceList;
+using DominoAPI.Exceptions;
 using DominoAPI.Models.Create;
 using DominoAPI.Models.Display.Butchery;
 using DominoAPI.Models.Update.Butchery;
@@ -28,19 +29,19 @@ namespace DominoAPI.Services
     {
         private readonly DominoDbContext _dbContext;
         private readonly IMapper _mapper;
+        private readonly ILogger<ButcheryService> _logger;
 
-        public ButcheryService(DominoDbContext dbContext, IMapper mapper)
+        public ButcheryService(DominoDbContext dbContext, IMapper mapper, ILogger<ButcheryService> logger)
         {
             _dbContext = dbContext;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<List<DisplaySausageDto>> GetAllSausages()
         {
             var sausages = await _dbContext.Sausages
                 .Include(s => s.Product)
-                .Include(s => s.Ingredients)
-                .ThenInclude(i => i.Product)
                 .AsNoTracking()
                 .ToListAsync();
 
@@ -60,7 +61,7 @@ namespace DominoAPI.Services
 
             if (sausage is null)
             {
-                throw new Exception();
+                throw new NotFoundException("Content not found");
             }
 
             var sausageDto = _mapper.Map<DisplaySausageDto>(sausage);
@@ -78,7 +79,7 @@ namespace DominoAPI.Services
 
             if (sausage is null)
             {
-                throw new Exception();
+                throw new NotFoundException("Content not found");
             }
 
             var ingredientDtos = _mapper.Map<List<DisplayIngredientDto>>(sausage.Ingredients);
@@ -98,7 +99,7 @@ namespace DominoAPI.Services
                 || product.ProductType != ProductType.Sausage
                 || (int)dto.Ingredients.Select(i => i.Content).Sum() != 1)
             {
-                throw new Exception();
+                throw new NotFoundException("Content not found");
             }
 
             foreach (var ingredient in dto.Ingredients)
@@ -109,7 +110,7 @@ namespace DominoAPI.Services
 
                 if (tempProduct is null)
                 {
-                    throw new Exception();
+                    throw new BadRequestException("Wrong input");
                 }
             }
 
@@ -129,7 +130,7 @@ namespace DominoAPI.Services
 
             if (sausage is null)
             {
-                throw new Exception();
+                throw new NotFoundException("Content not found");
             }
 
             _dbContext.Sausages.Remove(sausage);
@@ -144,7 +145,7 @@ namespace DominoAPI.Services
 
             if (sausage is null)
             {
-                throw new Exception();
+                throw new NotFoundException("Content not found");
             }
 
             if (dto.Yield != null)
@@ -165,10 +166,8 @@ namespace DominoAPI.Services
 
                     if (product is null)
                     {
-                        throw new Exception();
+                        throw new BadRequestException("Wrong input");
                     }
-
-                    ingredient.Product = product;
                 }
             }
 

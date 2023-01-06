@@ -6,6 +6,7 @@ using DominoAPI.Models.Display.Shops;
 using DominoAPI.Models.Update.Shops;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
+using UtilityLibrary;
 
 namespace DominoAPI.Services
 {
@@ -38,11 +39,13 @@ namespace DominoAPI.Services
     {
         private readonly DominoDbContext _dbContext;
         private readonly IMapper _mapper;
+        private readonly ILogger<ShopsService> _logger;
 
-        public ShopsService(DominoDbContext dbContext, IMapper mapper)
+        public ShopsService(DominoDbContext dbContext, IMapper mapper, ILogger<ShopsService> logger)
         {
             _dbContext = dbContext;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<List<DisplayShopDto>> GetAllShops()

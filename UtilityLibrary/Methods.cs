@@ -1,6 +1,6 @@
-﻿using DominoAPI.Entities.Fleet;
+﻿using Microsoft.EntityFrameworkCore;
 
-namespace DominoAPI.Services
+namespace UtilityLibrary
 {
     public static class Methods
     {
