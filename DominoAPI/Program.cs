@@ -1,7 +1,9 @@
 using DominoAPI.Entities;
 using DominoAPI.Middleware;
 using DominoAPI.Models.Query;
+using DominoAPI.Models.Query.Fleet;
 using DominoAPI.Services;
+using Duende.IdentityServer.Validation;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using NLog;
@@ -20,6 +22,11 @@ namespace DominoAPI
             {
                 var builder = WebApplication.CreateBuilder(args);
 
+                IConfigurationRoot configuration = new ConfigurationBuilder()
+                    .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                    .AddJsonFile("appsettings.json")
+                    .Build();
+
                 builder.Services.AddControllers();
 
                 builder.Services.AddDbContext<DominoDbContext>();
@@ -37,7 +44,9 @@ namespace DominoAPI
                 builder.Services.AddScoped<RequestTimeMiddleware>();
                 builder.Services.AddScoped<ErrorHandlingMiddleware>();
 
-                builder.Services.AddScoped<IValidator<QueryParams>, FleetQueryValidator>();
+                builder.Services.AddScoped<IValidator<FuelSuppliesQueryParams>, FuelSuppliesQueryValidator>();
+                builder.Services.AddScoped<IValidator<FuelNotesQueryParams>, FuelNotesQueryValidator>();
+                builder.Services.AddScoped<IValidator<SalesQueryParams>, SalesQueryValidator>();
 
                 builder.Logging.ClearProviders();
                 builder.Logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
@@ -45,7 +54,19 @@ namespace DominoAPI
 
                 builder.Services.AddSwaggerGen();
 
+                builder.Services.AddCors(options =>
+                {
+                    options.AddPolicy("FrontEndClient", builder =>
+                        builder.AllowAnyMethod()
+                            .AllowAnyHeader()
+                            .WithOrigins(configuration["AllowedOrigins"])
+                    );
+                });
+
                 var app = builder.Build();
+
+                app.UseStaticFiles();
+                app.UseCors("FrontEndClient");
 
                 void SeedDatabase()
                 {

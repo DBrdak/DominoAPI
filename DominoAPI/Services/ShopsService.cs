@@ -18,7 +18,7 @@ namespace DominoAPI.Services
 
         Task<object> GetShopDetails(int shopId);
 
-        Task<IEnumerable<DisplaySaleDto>> GetSales(int shopId, QueryParams query);
+        Task<PagedResult<DisplaySaleDto>> GetSales(int shopId, SalesQueryParams query);
 
         Task AddShop(CreateShopDto dto);
 
@@ -91,7 +91,7 @@ namespace DominoAPI.Services
             return dto;
         }
 
-        public async Task<IEnumerable<DisplaySaleDto>> GetSales(int shopId, QueryParams query)
+        public async Task<PagedResult<DisplaySaleDto>> GetSales(int shopId, SalesQueryParams query)
         {
             var shop = await _dbContext.Shops
                 .AsNoTracking()
@@ -104,23 +104,28 @@ namespace DominoAPI.Services
 
             DateTime.TryParse(query.SearchPhrase, out var dateOfSale);
 
-            var sales = await _dbContext.Sales
+            var baseSales = await _dbContext.Sales
                 .AsNoTracking()
                 .Where(ss => ss.ShopId == shopId)
                 .Where(ss => query.SearchPhrase == null ||
-                    (ss.Date >= dateOfSale && ss.Date < dateOfSale.AddDays(1)))
-                .Skip(query.PageSize * (query.PageId - 1))
-                .Take(query.PageSize)
+                             (ss.Date >= dateOfSale &&
+                              ss.Date < dateOfSale.AddDays(1)))
                 .ToListAsync();
+
+            baseSales = baseSales.Sort(query.SortBy, query.SortDirection.ToString()).ToList();
+
+            var sales = baseSales.GetPage(query.PageSize, query.PageId);
 
             if (!sales.Any())
             {
                 throw new NotFoundException("Content not found");
             }
 
-            var dto = _mapper.Map<IEnumerable<DisplaySaleDto>>(sales);
+            var dto = _mapper.Map<IList<DisplaySaleDto>>(sales);
 
-            return dto;
+            var result = new PagedResult<DisplaySaleDto>(dto, baseSales.Count, query.PageSize, query.PageId);
+
+            return result;
         }
 
         public async Task AddShop(CreateShopDto dto)

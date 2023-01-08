@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace DominoAPI.Controllers
 {
     [ApiController]
-    [Route("shops")]
+    [Route("api/shops")]
     public class ShopsController : ControllerBase
     {
         private readonly IShopsService _shopsService;
@@ -35,7 +35,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpGet("{shopId}/sales")]
-        public async Task<IActionResult> GetSales([FromRoute] int shopId, [FromQuery] QueryParams query)
+        public async Task<IActionResult> GetSales([FromRoute] int shopId, [FromQuery] SalesQueryParams query)
         {
             var shop = await _shopsService.GetSales(shopId, query);
 

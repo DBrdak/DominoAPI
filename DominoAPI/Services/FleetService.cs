@@ -1,4 +1,6 @@
-﻿using System.Data;
+﻿using System.Collections.Immutable;
+using System.Data;
+using System.Linq.Expressions;
 using System.Reflection;
 using AutoMapper;
 using DominoAPI.Entities;
@@ -11,6 +13,7 @@ using DominoAPI.Models.Update.Fleet;
 using FluentValidation.Validators;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 using UtilityLibrary;
 
 namespace DominoAPI.Services
@@ -19,9 +22,9 @@ namespace DominoAPI.Services
     {
         Task<IEnumerable<DisplayCarDto>> GetAllCars();
 
-        Task<PagedResult<DisplayFuelSupplyDto>> GetAllFuelSupplies(QueryParams query);
+        Task<PagedResult<DisplayFuelSupplyDto>> GetAllFuelSupplies(FuelSuppliesQueryParams query);
 
-        Task<PagedResult<DisplayFuelNoteDto>> GetFuelNotes(int fuelSupplyId, QueryParams query);
+        Task<PagedResult<DisplayFuelNoteDto>> GetFuelNotes(int fuelSupplyId, FuelNotesQueryParams query);
 
         Task AddCar(CreateCarDto dto);
 
@@ -75,21 +78,20 @@ namespace DominoAPI.Services
             return dto;
         }
 
-        public async Task<PagedResult<DisplayFuelSupplyDto>> GetAllFuelSupplies(QueryParams query)
+        public async Task<PagedResult<DisplayFuelSupplyDto>> GetAllFuelSupplies(FuelSuppliesQueryParams query)
         {
             DateTime.TryParse(query.SearchPhrase, out var dateOfDelivery);
-
+            var list = new List<int>(3) { 1, 2, 3 };
             var baseFuelSupplies = await _dbContext.FuelSupplies
-                .AsNoTracking()
-                .OrderByDescending(fs => fs.DateOfDelivery)
+                .AsNoTracking().
+                Where(fs => query.SearchPhrase == null
+                            || (fs.DateOfDelivery >= dateOfDelivery &&
+                                fs.DateOfDelivery < dateOfDelivery.AddDays(1)))
                 .ToListAsync();
 
-            var fuelSupplies = baseFuelSupplies
-                .Where(fs => query.SearchPhrase == null
-                             || (fs.DateOfDelivery >= dateOfDelivery &&
-                                 fs.DateOfDelivery < dateOfDelivery.AddDays(1)))
-                .Skip((query.PageSize * (query.PageId - 1)))
-                .Take(query.PageSize);
+            baseFuelSupplies = baseFuelSupplies.Sort(query.SortBy, query.SortDirection.ToString()).ToList();
+
+            var fuelSupplies = baseFuelSupplies.GetPage(query.PageSize, query.PageId);
 
             if (!fuelSupplies.Any())
             {
@@ -104,19 +106,22 @@ namespace DominoAPI.Services
             return result;
         }
 
-        public async Task<PagedResult<DisplayFuelNoteDto>> GetFuelNotes(int fuelSupplyId, QueryParams query)
+        public async Task<PagedResult<DisplayFuelNoteDto>> GetFuelNotes(int fuelSupplyId, FuelNotesQueryParams query)
         {
+            DateTime.TryParse(query.SearchPhrase, out var dateOfNote);
+
             var baseFuelNotes = await _dbContext.FuelNotes
                 .Include(fn => fn.Car)
                 .AsNoTracking()
                 .Where(fn => fn.FuelSupplyId == fuelSupplyId)
+                .Where(fn => query.SearchPhrase == null ||
+                             fn.Car.RegistrationNumber == query.SearchPhrase ||
+                             (fn.Date >= dateOfNote && fn.Date < dateOfNote.AddDays(1)))
                 .ToListAsync();
 
-            var fuelNotes = baseFuelNotes
-                .Where(fn => query.SearchPhrase == null ||
-                             fn.Car.RegistrationNumber == query.SearchPhrase)
-                .Skip(query.PageSize * (query.PageId - 1))
-                .Take(query.PageSize);
+            baseFuelNotes = baseFuelNotes.Sort(query.SortBy, query.SortDirection.ToString()).ToList();
+
+            var fuelNotes = baseFuelNotes.GetPage(query.PageSize, query.PageId);
 
             if (!fuelNotes.Any())
             {

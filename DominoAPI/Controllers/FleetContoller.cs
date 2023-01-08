@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace DominoAPI.Controllers
 {
     [ApiController]
-    [Route("fleet")]
+    [Route("api/fleet")]
     public class FleetContoller : ControllerBase
     {
         private readonly IFleetService _fleetService;
@@ -26,7 +26,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpGet("fuel-supply")]
-        public async Task<IActionResult> GetAllFuelSupplies([FromQuery] QueryParams query)
+        public async Task<IActionResult> GetAllFuelSupplies([FromQuery] FuelSuppliesQueryParams query)
         {
             var fuelNotes = await _fleetService.GetAllFuelSupplies(query);
 
@@ -34,7 +34,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpGet("fuel-supply/{fuelSupplyId}/fuel-notes")]
-        public async Task<IActionResult> GetFuelNotes([FromRoute] int fuelSupplyId, [FromQuery] QueryParams query)
+        public async Task<IActionResult> GetFuelNotes([FromRoute] int fuelSupplyId, [FromQuery] FuelNotesQueryParams query)
         {
             var fuelNotes = await _fleetService.GetFuelNotes(fuelSupplyId, query);
 

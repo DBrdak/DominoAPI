@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace DominoAPI.Controllers
 {
     [ApiController]
-    [Route("price-list")]
+    [Route("api/price-list")]
     public class PriceListController : ControllerBase
     {
         private IPriceListService _priceListService;

@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 namespace DominoAPI.Controllers
 {
     [ApiController]
-    [Route("butchery")]
+    [Route("api/butchery")]
     public class ButcheryController : ControllerBase
     {
         private IButcheryService _butcheryService;
