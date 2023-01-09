@@ -2,7 +2,7 @@
 {
     public class PagedResult<T>
     {
-        public IList<T> Results { get; set; }
+        public IEnumerable<T> Results { get; set; }
         public int TotalPages { get; set; }
         public int ResultsFrom { get; set; }
 
@@ -10,7 +10,7 @@
 
         public int ResultsCount { get; set; }
 
-        public PagedResult(IList<T> results, int resultsCount, int pageSize, int pageId)
+        public PagedResult(IEnumerable<T> results, int resultsCount, int pageSize, int pageId)
         {
             Results = results;
             ResultsCount = resultsCount;

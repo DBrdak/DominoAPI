@@ -47,5 +47,12 @@ namespace UtilityLibrary
                 .Skip(pageSize * (pageId - 1))
                 .Take(pageSize);
         }
+
+        public static bool ValidatePassword(this string password)
+        {
+            return password.Any(char.IsDigit)
+                   && password.Any(char.IsUpper)
+                   && password.Any(char.IsLower);
+        }
     }
 }

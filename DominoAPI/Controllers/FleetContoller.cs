@@ -2,10 +2,12 @@
 using DominoAPI.Models.Query;
 using DominoAPI.Models.Update.Fleet;
 using DominoAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DominoAPI.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/fleet")]
     public class FleetContoller : ControllerBase
@@ -26,6 +28,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpGet("fuel-supply")]
+        [Authorize(Roles = "Admin,Head user,Employee")]
         public async Task<IActionResult> GetAllFuelSupplies([FromQuery] FuelSuppliesQueryParams query)
         {
             var fuelNotes = await _fleetService.GetAllFuelSupplies(query);
@@ -34,6 +37,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpGet("fuel-supply/{fuelSupplyId}/fuel-notes")]
+        [Authorize(Roles = "Admin,Head user,Employee")]
         public async Task<IActionResult> GetFuelNotes([FromRoute] int fuelSupplyId, [FromQuery] FuelNotesQueryParams query)
         {
             var fuelNotes = await _fleetService.GetFuelNotes(fuelSupplyId, query);
@@ -42,6 +46,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpPost("cars")]
+        [Authorize(Roles = "Admin,Head user, Employee")]
         public async Task<IActionResult> AddCar([FromBody] CreateCarDto dto)
         {
             await _fleetService.AddCar(dto);
@@ -50,6 +55,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpPost("fuel-supply")]
+        [Authorize(Roles = "Admin,Head user,Employee")]
         public async Task<IActionResult> AddFuelSupply([FromBody] CreateFuelSupplyDto dto)
         {
             await _fleetService.AddFuelSupply(dto);
@@ -58,6 +64,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpPost("fuel-notes")]
+        [Authorize(Roles = "Admin,Head user,Employee")]
         public async Task<IActionResult> AddRecentFuelNote([FromBody] CreateFuelNoteDto dto)
         {
             await _fleetService.AddRecentFuelNote(dto);
@@ -66,6 +73,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpPost("fuel-supply/{fuelSupplyId}/fuel-notes")]
+        [Authorize(Roles = "Admin,Head user,Employee")]
         public async Task<IActionResult> AddManuallyFuelNote([FromBody] CreateFuelNoteDto dto, [FromRoute] int fuelSupplyId)
         {
             await _fleetService.AddManuallyFuelNote(dto, fuelSupplyId);
@@ -74,6 +82,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpPut("cars/{carId}/notes")]
+        [Authorize(Roles = "Admin,Head user,Employee")]
         public async Task<IActionResult> UpdateCarNote([FromBody] string note, [FromRoute] int carId)
         {
             await _fleetService.UpdateCarNote(note, carId);
@@ -82,6 +91,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpPut("cars/{carId}")]
+        [Authorize(Roles = "Admin,Head user,Employee")]
         public async Task<IActionResult> UpdateCar([FromBody] UpdateCarDto dto, [FromRoute] int carId)
         {
             await _fleetService.UpdateCar(dto, carId);
@@ -90,6 +100,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpPut("fuel-supply/{fuelSupplyId}")]
+        [Authorize(Roles = "Admin,Head user,Employee")]
         public async Task<IActionResult> UpdateFuelSupply([FromBody] UpdateFuelSupplyDto dto, [FromRoute] int fuelSupplyId)
         {
             await _fleetService.UpdateFuelSupply(dto, fuelSupplyId);
@@ -98,6 +109,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpPut("fuel-supply/{fuelSupplyId}/{fuelNoteId}")]
+        [Authorize(Roles = "Admin,Head user,Employee")]
         public async Task<IActionResult> UpdateFuelNote([FromBody] UpdateFuelNoteDto dto,
             [FromRoute] int fuelNoteId, [FromRoute] int fuelSupplyId)
         {
@@ -107,6 +119,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpDelete("cars/{carId}")]
+        [Authorize(Roles = "Admin,Head user")]
         public async Task<IActionResult> DeleteCar([FromRoute] int carId)
         {
             await _fleetService.DeleteCar(carId);
@@ -115,6 +128,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpDelete("fuel-supply/{fuelSupplyId}")]
+        [Authorize(Roles = "Admin,Head user")]
         public async Task<IActionResult> DeleteFuelSupply([FromRoute] int fuelSupplyId)
         {
             await _fleetService.DeleteFuelSupply(fuelSupplyId);
@@ -123,6 +137,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpDelete("fuel-supply/{fuelSupplyId}/{fuelNoteId}")]
+        [Authorize(Roles = "Admin,Head user")]
         public async Task<IActionResult> DeleteFuelNote([FromRoute] int fuelNoteId, [FromRoute] int fuelSupplyId)
         {
             await _fleetService.DeleteFuelNote(fuelNoteId, fuelSupplyId);
@@ -131,6 +146,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpDelete("fuel-supply/{fuelSupplyId}/fuel-notes")]
+        [Authorize(Roles = "Admin,Head user")]
         public async Task<IActionResult> DeleteFuelNoteRange([FromRoute] int fuelSupplyId, [FromBody] List<int> fuelNotesId)
         {
             await _fleetService.DeleteFuelNoteRange(fuelSupplyId, fuelNotesId);
@@ -139,6 +155,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpDelete("fuel-supply/{fuelSupplyId}/fuel-notes/all")]
+        [Authorize(Roles = "Admin,Head user")]
         public async Task<IActionResult> DeleteAllFuelNotes([FromRoute] int fuelSupplyId)
         {
             await _fleetService.DeleteAllFuelNotes(fuelSupplyId);

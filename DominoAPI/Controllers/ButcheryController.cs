@@ -3,6 +3,7 @@ using DominoAPI.Models;
 using DominoAPI.Models.Create;
 using DominoAPI.Models.Update.Butchery;
 using DominoAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
 using Newtonsoft.Json;

@@ -31,6 +31,13 @@ namespace DominoAPI.Middleware
                 context.Response.StatusCode = 404;
                 await context.Response.WriteAsync(notFoundException.Message);
             }
+            catch (ForbidException forbidException)
+            {
+                _logger.LogError(forbidException, forbidException.Message);
+
+                context.Response.StatusCode = 403;
+                await context.Response.WriteAsync(forbidException.Message);
+            }
             catch (Exception e)
             {
                 _logger.LogError(e, e.Message);

@@ -7,7 +7,7 @@
         public float Volume { get; set; }
 
         public int CarId { get; set; }
-        public virtual Car Car { get; set; }
+        public virtual Car? Car { get; set; }
 
         public int FuelSupplyId { get; set; }
         public virtual FuelSupply FuelSupply { get; set; }

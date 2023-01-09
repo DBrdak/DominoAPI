@@ -81,7 +81,7 @@ namespace DominoAPI.Services
         public async Task<PagedResult<DisplayFuelSupplyDto>> GetAllFuelSupplies(FuelSuppliesQueryParams query)
         {
             DateTime.TryParse(query.SearchPhrase, out var dateOfDelivery);
-            var list = new List<int>(3) { 1, 2, 3 };
+
             var baseFuelSupplies = await _dbContext.FuelSupplies
                 .AsNoTracking().
                 Where(fs => query.SearchPhrase == null

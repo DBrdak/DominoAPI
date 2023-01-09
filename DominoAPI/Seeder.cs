@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using DominoAPI.Entities;
+using DominoAPI.Entities.Accounts;
 using DominoAPI.Entities.Butchery;
 using DominoAPI.Entities.Fleet;
 using DominoAPI.Entities.PriceList;
@@ -17,7 +18,7 @@ namespace DominoAPI
             {
                 var pendingMigrations = await _dbContext.Database.GetPendingMigrationsAsync();
 
-                if (pendingMigrations != null && !pendingMigrations.Any())
+                if (pendingMigrations != null && pendingMigrations.Any())
                 {
                     await _dbContext.Database.MigrateAsync();
                 }
@@ -497,6 +498,30 @@ namespace DominoAPI
                     await _dbContext.Sales.AddRangeAsync(sales);
                     await _dbContext.FuelNotes.AddRangeAsync(fuelNotes);
                     await _dbContext.FuelSupplies.AddRangeAsync(fuelSupplies);
+                }
+
+                if (!_dbContext.Roles.Any())
+                {
+                    var roles = new List<Role>()
+                    {
+                        new Role()
+                        {
+                            Name = "Admin"
+                        },
+                        new Role()
+                        {
+                            Name = "Head user"
+                        },
+                        new Role()
+                        {
+                            Name = "Employee"
+                        },
+                        new Role()
+                        {
+                            Name = "Guest"
+                        }
+                    };
+                    await _dbContext.Roles.AddRangeAsync(roles);
                 }
 
                 await _dbContext.SaveChangesAsync();

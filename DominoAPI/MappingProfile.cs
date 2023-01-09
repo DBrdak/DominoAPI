@@ -1,8 +1,11 @@
 ﻿using AutoMapper;
+using DominoAPI.Entities.Accounts;
 using DominoAPI.Entities.Butchery;
 using DominoAPI.Entities.Fleet;
 using DominoAPI.Entities.PriceList;
 using DominoAPI.Entities.Shops;
+using DominoAPI.Models.AccountModels;
+using DominoAPI.Models.AccountModels.Display;
 using DominoAPI.Models.Create;
 using DominoAPI.Models.Create.Fleet;
 using DominoAPI.Models.Create.PriceList;
@@ -81,6 +84,13 @@ namespace DominoAPI
 
                 CreateMap<CreateFuelSupplyDto, FuelSupply>()
                     .ForMember(fs => fs.CurrentVolume, a => a.MapFrom(b => b.DeliveryVolume));
+            }
+
+            //Account maps
+            {
+                CreateMap<RegisterUserDto, User>();
+
+                CreateMap<User, DisplayUserDto>();
             }
         }
     }

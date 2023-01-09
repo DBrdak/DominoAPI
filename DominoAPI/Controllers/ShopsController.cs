@@ -2,11 +2,13 @@
 using DominoAPI.Models.Query;
 using DominoAPI.Models.Update.Shops;
 using DominoAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace DominoAPI.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/shops")]
     public class ShopsController : ControllerBase
@@ -35,6 +37,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpGet("{shopId}/sales")]
+        [Authorize(Roles = "Admin,Head user,Employee")]
         public async Task<IActionResult> GetSales([FromRoute] int shopId, [FromQuery] SalesQueryParams query)
         {
             var shop = await _shopsService.GetSales(shopId, query);
@@ -43,6 +46,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin,Head user,Employee")]
         public async Task<IActionResult> AddMobileShop([FromBody] CreateShopDto dto)
         {
             await _shopsService.AddShop(dto);
@@ -51,6 +55,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpPost("{shopId}/sales")]
+        [Authorize(Roles = "Admin,Head user,Employee")]
         public async Task<IActionResult> AddNewSale([FromRoute] int shopId, [FromBody] CreateSaleDto dto)
         {
             await _shopsService.AddNewSale(dto, shopId);
@@ -59,6 +64,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpPost("sales/{shopId}")]
+        [Authorize(Roles = "Admin,Head user,Employee")]
         public async Task<IActionResult> AddNewRecentSale([FromRoute] int shopId, [FromBody] CreateSaleDto dto)
         {
             await _shopsService.AddNewRecentSale(dto, shopId);
@@ -67,6 +73,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpPut("{shopId}")]
+        [Authorize(Roles = "Admin,Head user,Employee")]
         public async Task<IActionResult> UpdateShop([FromRoute] int shopId, [FromBody] UpdateShopDto dto)
         {
             await _shopsService.UpdateShop(dto, shopId);
@@ -75,6 +82,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpDelete("{shopId}")]
+        [Authorize(Roles = "Admin,Head user")]
         public async Task<IActionResult> DeleteShop([FromRoute] int shopId)
         {
             await _shopsService.DeleteShop(shopId);
@@ -83,6 +91,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpDelete("{shopId}/sales/{saleId}")]
+        [Authorize(Roles = "Admin,Head user")]
         public async Task<IActionResult> DeleteSale([FromRoute] int shopId, [FromRoute] int saleId)
         {
             await _shopsService.DeleteSale(shopId, saleId);
@@ -91,6 +100,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpDelete("{shopId}/sales")]
+        [Authorize(Roles = "Admin,Head user")]
         public async Task<IActionResult> DeleteSalesRange([FromRoute] int shopId, [FromBody] List<int> salesId)
         {
             await _shopsService.DeleteSalesRange(shopId, salesId);
@@ -99,6 +109,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpDelete("{shopId}/sales/all")]
+        [Authorize(Roles = "Admin,Head user")]
         public async Task<IActionResult> DeleteAllSales([FromRoute] int shopId)
         {
             await _shopsService.DeleteAllSales(shopId);
