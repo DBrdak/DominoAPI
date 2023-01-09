@@ -9,6 +9,7 @@ namespace DominoAPI.Controllers
 {
     [Route("api/account")]
     [ApiController]
+    [Authorize]
     public class AccountController : ControllerBase
     {
         private readonly IAccountService _accountService;
@@ -19,6 +20,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpPost("register")]
+        [AllowAnonymous]
         public async Task<IActionResult> RegisterUser([FromBody] RegisterUserDto dto)
         {
             await _accountService.RegisterUser(dto);
@@ -27,6 +29,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpGet("login")]
+        [AllowAnonymous]
         public async Task<IActionResult> LoginUser([FromBody] LoginUserDto dto)
         {
             var token = await _accountService.LoginUser(dto);
@@ -35,7 +38,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpGet("users")]
-        [Authorize(Roles = "")]
+        [Authorize(Roles = "Head user,Admin")]
         public async Task<IActionResult> GetAllUsers([FromQuery] UserQueryParams query)
         {
             var dto = await _accountService.GetAllUsers(query);
@@ -52,6 +55,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpPut("users/{userId}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ManageUser([FromBody] UpdateExternalUserDto dto, [FromRoute] int userId)
         {
             await _accountService.ManageUser(dto, userId);
@@ -60,6 +64,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpDelete("users/{userId}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteUser([FromRoute] int userId)
         {
             await _accountService.DeleteUser(userId);

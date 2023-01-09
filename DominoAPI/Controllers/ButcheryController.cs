@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 
 namespace DominoAPI.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/butchery")]
     public class ButcheryController : ControllerBase
@@ -46,6 +47,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpPost("sausages")]
+        [Authorize(Roles = "Admin,Head user,Employee")]
         public async Task<IActionResult> AddSausage([FromBody] CreateSausageDto dto)
         {
             await _butcheryService.AddSausage(dto);
@@ -54,6 +56,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpDelete("sausages/{sausageId}")]
+        [Authorize(Roles = "Admin,Head user")]
         public async Task<IActionResult> DeleteSausage([FromRoute] int sausageId)
         {
             await _butcheryService.DeleteSausage(sausageId);
@@ -62,6 +65,7 @@ namespace DominoAPI.Controllers
         }
 
         [HttpPut("sausages/{sausageId}")]
+        [Authorize(Roles = "Admin,Head user")]
         public async Task<IActionResult> UpdateSausage([FromRoute] int sausageId, [FromBody] UpdateSausageDto dto)
         {
             await _butcheryService.UpdateSausage(sausageId, dto);
