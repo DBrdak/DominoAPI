@@ -11,6 +11,10 @@ namespace DominoAPI.Entities
 {
     public class DominoDbContext : DbContext
     {
+        public DominoDbContext(DbContextOptions<DominoDbContext> options) : base(options)
+        {
+        }
+
         public DbSet<Product> Products { get; set; }
         public DbSet<Sausage> Sausages { get; set; }
         public DbSet<Ingredient> Ingredients { get; set; }
@@ -51,16 +55,6 @@ namespace DominoAPI.Entities
             modelBuilder.Entity<FuelNote>()
                 .HasOne(fn => fn.FuelSupply)
                 .WithMany(fs => fs.FuelNotes);
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            IConfigurationRoot configuration = new ConfigurationBuilder()
-                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                .AddJsonFile("appsettings.json")
-                .Build();
-
-            optionsBuilder.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
         }
     }
 }

@@ -6,6 +6,7 @@ using DominoAPI.Services;
 using Duende.IdentityServer.Validation;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.EntityFrameworkCore;
 using NLog;
 using NLog.Web;
 
@@ -24,12 +25,13 @@ namespace DominoAPI
 
                 IConfigurationRoot configuration = new ConfigurationBuilder()
                     .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                    .AddJsonFile("appsettings.json")
+                    .AddJsonFile("appsettings.Development.json")
                     .Build();
 
                 builder.Services.AddControllers();
 
-                builder.Services.AddDbContext<DominoDbContext>();
+                builder.Services.AddDbContext<DominoDbContext>
+                    (options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
                 builder.Services.AddScoped<Seeder>();
 
@@ -68,20 +70,20 @@ namespace DominoAPI
                 app.UseStaticFiles();
                 app.UseCors("FrontEndClient");
 
-                void SeedDatabase()
+                async Task SeedDatabase()
                 {
                     using var scope = app.Services.CreateScope();
                     try
                     {
                         var scopedContext = scope.ServiceProvider.GetRequiredService<DominoDbContext>();
-                        Seeder.Seed(scopedContext);
+                        await Seeder.Seed(scopedContext);
                     }
                     catch
                     {
                         throw;
                     }
                 }
-                SeedDatabase();
+                await SeedDatabase();
 
                 app.UseMiddleware<RequestTimeMiddleware>();
                 app.UseMiddleware<ErrorHandlingMiddleware>();

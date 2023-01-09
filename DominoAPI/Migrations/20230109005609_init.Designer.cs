@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DominoAPI.Migrations
 {
     [DbContext(typeof(DominoDbContext))]
-    [Migration("20230104191712_CarcassRemoved")]
-    partial class CarcassRemoved
+    [Migration("20230109005609_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

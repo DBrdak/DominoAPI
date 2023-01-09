@@ -4,16 +4,24 @@ using DominoAPI.Entities.Butchery;
 using DominoAPI.Entities.Fleet;
 using DominoAPI.Entities.PriceList;
 using DominoAPI.Entities.Shops;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace DominoAPI
 {
     public class Seeder
     {
-        public static void Seed(DominoDbContext _dbContext)
+        public static async Task Seed(DominoDbContext _dbContext)
         {
-            if (_dbContext.Database.CanConnect())
+            if (await _dbContext.Database.CanConnectAsync())
             {
+                var pendingMigrations = await _dbContext.Database.GetPendingMigrationsAsync();
+
+                if (pendingMigrations != null && !pendingMigrations.Any())
+                {
+                    await _dbContext.Database.MigrateAsync();
+                }
+
                 if (!_dbContext.Sausages.Any() && !_dbContext.Products.Any())
                 {
                     var products = new List<Product>()
@@ -484,14 +492,14 @@ namespace DominoAPI
                         }
                     };
 
-                    _dbContext.Cars.AddRange(cars);
-                    _dbContext.Shops.AddRange(shops);
-                    _dbContext.Sales.AddRange(sales);
-                    _dbContext.FuelNotes.AddRange(fuelNotes);
-                    _dbContext.FuelSupplies.AddRange(fuelSupplies);
+                    await _dbContext.Cars.AddRangeAsync(cars);
+                    await _dbContext.Shops.AddRangeAsync(shops);
+                    await _dbContext.Sales.AddRangeAsync(sales);
+                    await _dbContext.FuelNotes.AddRangeAsync(fuelNotes);
+                    await _dbContext.FuelSupplies.AddRangeAsync(fuelSupplies);
                 }
 
-                _dbContext.SaveChanges();
+                await _dbContext.SaveChangesAsync();
             }
         }
     }
