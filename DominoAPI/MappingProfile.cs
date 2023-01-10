@@ -76,7 +76,8 @@ namespace DominoAPI
 
                 CreateMap<FuelSupply, DisplayFuelSupplyDto>()
                     .ForMember(fs => fs.DateOfDelivery, a => a.MapFrom(b => b.DateOfDelivery.ToShortDateString()))
-                    .ForMember(fs => fs.FuelNotes, a => a.MapFrom(b => b.FuelNotes));
+                    .ForMember(fs => fs.FuelNotes, a => a.MapFrom(b => b.FuelNotes))
+                    .ForMember(fs => fs.CurrentVolume, a => a.MapFrom(b => Math.Ceiling(b.CurrentVolume)));
 
                 CreateMap<CreateCarDto, Car>();
 
@@ -90,7 +91,8 @@ namespace DominoAPI
             {
                 CreateMap<RegisterUserDto, User>();
 
-                CreateMap<User, DisplayUserDto>();
+                CreateMap<User, DisplayUserDto>()
+                    .ForMember(u => u.RoleName, a => a.MapFrom(b => b.Role.Name));
             }
         }
     }

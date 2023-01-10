@@ -90,7 +90,7 @@ namespace DominoAPI.Services
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Role.Name)
+                new Claim(ClaimTypes.Role, $"{user.Role.Name}")
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authenticationSettings.JwtKey));
@@ -111,6 +111,7 @@ namespace DominoAPI.Services
         public async Task<PagedResult<DisplayUserDto>> GetAllUsers(UserQueryParams query)
         {
             var baseUsers = await _dbContext.Users
+                .Include(u => u.Role)
                 .Where(u => u.Email.Contains(query.SearchPhrase)
                             || query.SearchPhrase == null)
                 .AsNoTracking()

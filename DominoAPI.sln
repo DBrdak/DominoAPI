@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DominoAPI", "DominoAPI\Domi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UtilityLibrary", "UtilityLibrary\UtilityLibrary.csproj", "{A5A11CB8-EC3B-462A-A5B2-CF1B4ED02710}"
 EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "dominoclient", "DominoClient\dominoclient.esproj", "{34680CE6-6D55-4656-85F9-447E55D2F72B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,12 @@ Global
 		{A5A11CB8-EC3B-462A-A5B2-CF1B4ED02710}.Debug|Any CPU.Build.0 = Release|Any CPU
 		{A5A11CB8-EC3B-462A-A5B2-CF1B4ED02710}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A5A11CB8-EC3B-462A-A5B2-CF1B4ED02710}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34680CE6-6D55-4656-85F9-447E55D2F72B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34680CE6-6D55-4656-85F9-447E55D2F72B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34680CE6-6D55-4656-85F9-447E55D2F72B}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{34680CE6-6D55-4656-85F9-447E55D2F72B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34680CE6-6D55-4656-85F9-447E55D2F72B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34680CE6-6D55-4656-85F9-447E55D2F72B}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
